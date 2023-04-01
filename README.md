@@ -92,11 +92,31 @@ python -m build
 Run pip install -r -e .
 Run pip install -r requirements.txt
 
+
 ## Step 5: Start working on `logger` and `exception`
 
+## Step 5: Start working on `constant/__init__.py`
 
+## Step 5: Create Files in entity folder and component folder
 
+* ThyroidPrediction
+    - `__init__.py`
+    - entity
 
+        -   `__init__.py`
+        -   artifact_entity.py
+        -   config_enity.py
+        -   experiment_entity.py
+        -   model_factory.py
+        -   thyroid_predictor.py
+    - component
+        -   `__init__.py`
+        -   data_ingestion.py
+        -   data_validation.py
+        -   data_transformation.py
+        -   model_evaluation.py
+        -   model_pusher.py
+        -   model_trainer.py
 
 
 
@@ -115,21 +135,36 @@ ML-04-ThyroidPrediction
 ├─ app.py
 ├─ Dockerfile
 ├─ LICENSE
+├─ logs
 ├─ README.md
 ├─ requirements.txt
 ├─ setup.py
 └─ ThyroidPrediction
    ├─ component
+   │  ├─ data_ingestion.py
+   │  ├─ data_transformation.py
+   │  ├─ data_validation.py
+   │  ├─ model_evaluation.py
+   │  ├─ model_pusher.py
+   │  ├─ model_trainer.py
    │  └─ __init__.py
    ├─ config
    │  └─ __init__.py
+   ├─ constant
+   │  └─ __init__.py
    ├─ entity
+   │  ├─ artifact_entity.py
+   │  ├─ config_entity.py
+   │  ├─ experiment.py
+   │  ├─ model_factory.py
+   │  ├─ thyroid_predictor.py
    │  └─ __init__.py
    ├─ exception
    │  └─ __init__.py
    ├─ logger
    │  └─ __init__.py
    ├─ pipeline
+   │  ├─ pipeline.py
    │  └─ __init__.py
    └─ __init__.py
 
