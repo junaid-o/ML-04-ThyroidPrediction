@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 # Declearing Variables for setup function
 PROJECT_NAME = "Thyroid Predictor"
-VERSION = "0.0.1"
+VERSION = "0.0.0"
 AUTHOR = "Junaid"
 DESCRIPTION = """This is Thyroid Prdiction WebApp"""
 #PACKAGES = ["ThyroidPredicion"]   # Name of package folder
@@ -22,4 +22,4 @@ def get_requirements_list() ->  List[str]:
     with open(REQUIREMENTS_FILE_NAME) as requirement_file:
         return requirement_file.readlines()
 
-setup(name= PROJECT_NAME, version=VERSION, author=AUTHOR, packages= find_packages, install_requires=get_requirements_list())
+setup(name= PROJECT_NAME, version=VERSION, author=AUTHOR, packages= find_packages(), install_requires=get_requirements_list())
