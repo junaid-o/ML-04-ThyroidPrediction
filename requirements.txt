@@ -1,9 +1,9 @@
+PyYAML
+dill
+six
+evidently
 flask
 numpy
 pandas
 scikit-learn
 gunicorn
-yaml
-dill
-six
-evidently
