@@ -1,5 +1,5 @@
 training_pipeline_config:
-  pipeline_name: housing
+  pipeline_name: thyroid
   artifact_dir: artifact
 
 data_ingestion_config:
@@ -10,7 +10,6 @@ data_ingestion_config:
   ingested_train_dir: train
   ingested_test_dir: test 
 
-
 data_validation_config:
   schema_dir: config
   schema_file_name: schema.yaml
@@ -18,7 +17,7 @@ data_validation_config:
   report_page_file_name: report.html
 
 data_transformation_config:
-  add_bedroom_per_room: true
+  #add_bedroom_per_room: true
   transformed_dir: transformed_data
   transformed_train_dir: train
   transformed_test_dir: test

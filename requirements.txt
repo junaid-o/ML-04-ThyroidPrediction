@@ -5,5 +5,9 @@ evidently
 flask
 numpy
 pandas
+matplotlib
 scikit-learn
+seaborn
+plotly
+imbalanced-learn
 gunicorn
