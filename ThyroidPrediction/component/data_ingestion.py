@@ -153,7 +153,8 @@ class DataIngestion:
                             'TSH','T3_measured','T3', 'TT4_measured', 'TT4', 'T4U_measured','T4U', 'FTI_measured', 'FTI', 'TBG_measured', 'TBG', 'referral_source',
                             'Class']
 
-
+            logging.info(f"{'='*20} READING BASE DATASET {'='*20} \n\n Walking Through All Dirs In [ {dir_path} ] for all .data and .test files")
+            
             # Traverse the directory structure recursively
             for root, dirs, files in os.walk(dir_path):
                 for file in files:
@@ -214,14 +215,14 @@ class DataIngestion:
 
             #print("Hypopituitory Uniqu valus",df_combined["hypopituitary"].unique())
 
-            processed_dataset_dir = os.path.join(self.base_dataset_path,"Processed_Dataset")
+            processed_dataset_dir = os.path.join(self.base_dataset_path,"Processed_Dataset","Cleaned_Data")
             os.makedirs(processed_dataset_dir, exist_ok=True)
 
-            processed_data_file_path = os.path.join(processed_dataset_dir,"df_combined.csv")
+            processed_data_file_path = os.path.join(processed_dataset_dir,"df_combined_cleaned.csv")
             df_combined.to_csv(processed_data_file_path,index=False)
 
 
-            #######################################################################
+            #######################################    MISSING vALUE IMPUATION    ##########################################################
 
             df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
             df_combined['age'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["age"]].values)
@@ -250,7 +251,7 @@ class DataIngestion:
                     print(feature, df_combined[feature].unique())
 
             df_combined = pd.get_dummies(data  = df_combined, columns=['referral_source'], drop_first=True)
-            df_combined["Class"] = LabelEncoder().fit_transform(df_combined["Class"])
+            df_combined["Class_encoded"] = LabelEncoder().fit_transform(df_combined["Class"])
 
 
             ############################## OUTLIERS HANDLING ###############################
