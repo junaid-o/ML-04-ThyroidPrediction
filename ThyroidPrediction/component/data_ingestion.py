@@ -222,148 +222,147 @@ class DataIngestion:
             df_combined.to_csv(processed_data_file_path,index=False)
 
 
-            #######################################    MISSING vALUE IMPUATION    ##########################################################
+            ########################################    MISSING vALUE IMPUATION    ##########################################################
 
-            df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
-            df_combined['age'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["age"]].values)
+            #df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
+            #df_combined['age'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["age"]].values)
 
-            df_combined['TSH'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TSH"]].values)
-            df_combined['T3'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T3"]].values)
-            df_combined['TT4'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TT4"]].values)
-            df_combined['T4U'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T4U"]].values)
-            df_combined['FTI'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["FTI"]].values)
-
-
-            ###################### HANDLINNG CATEGOICAL VARIABLES ###########################
-            df_combined_plot = df_combined.copy()
-            
-            columns_list = df_combined.columns.to_list()
-            
-            for feature in columns_list:
-                if len(df_combined[feature].unique()) <= 3:
-
-                    print(feature, df_combined[feature].unique())
-
-                    value1 = df_combined[feature].unique()[0]
-                    value2 = df_combined[feature].unique()[1]
-                    df_combined[feature] = df_combined[feature].map({f'{value1}':0, f'{value2}':1})
-                    
-                    print(feature, df_combined[feature].unique())
-
-            df_combined = pd.get_dummies(data  = df_combined, columns=['referral_source'], drop_first=True)
-            df_combined["Class_encoded"] = LabelEncoder().fit_transform(df_combined["Class"])
+            #df_combined['TSH'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TSH"]].values)
+            #df_combined['T3'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T3"]].values)
+            #df_combined['TT4'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TT4"]].values)
+            #df_combined['T4U'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T4U"]].values)
+            #df_combined['FTI'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["FTI"]].values)
 
 
-            ############################## OUTLIERS HANDLING ###############################
+            ####################### HANDLINNG CATEGOICAL VARIABLES ###########################
+            #df_combined_plot = df_combined.copy()
+            #
+            #columns_list = df_combined.columns.to_list()
+            #
+            #for feature in columns_list:
+            #    if len(df_combined[feature].unique()) <= 3:
 
-            def outliers_fence(col):
-                Q1 = df_combined[col].quantile(q=0.25)
-                Q3 = df_combined[col].quantile(q=0.75)
-                IQR = Q3 - Q1
+            #        print(feature, df_combined[feature].unique())
 
-                lower_fence = Q1 - 1.5*IQR
-                upper_fence = Q3 + 1.5*IQR
-                return lower_fence, upper_fence
+            #        value1 = df_combined[feature].unique()[0]
+            #        value2 = df_combined[feature].unique()[1]
+            #        df_combined[feature] = df_combined[feature].map({f'{value1}':0, f'{value2}':1})
+            #        
+            #        print(feature, df_combined[feature].unique())
 
-            lower_fence1, upper_fence1 = outliers_fence(col='TSH')
-            lower_fence2, upper_fence2 = outliers_fence(col='T3')
-            lower_fence3, upper_fence3 = outliers_fence(col='TT4')
-            lower_fence4, upper_fence4 = outliers_fence(col='T4U')
-            lower_fence5, upper_fence5 = outliers_fence(col='FTI')
-
-            # Winsorize the data just replace outliers with corresponding fence
-
-            df_combined['TSH'] = np.where(df_combined["TSH"] < lower_fence1, lower_fence1, df_combined["TSH"])
-            df_combined["TSH"] = np.where(df_combined["TSH"] > upper_fence1, upper_fence1, df_combined["TSH"])
-
-            df_combined['T3'] = np.where(df_combined["T3"] < lower_fence2, lower_fence2, df_combined["T3"])
-            df_combined["T3"] = np.where(df_combined["T3"] > upper_fence2, upper_fence2, df_combined["T3"])
-
-            df_combined['TT4'] = np.where(df_combined["TT4"] < lower_fence3, lower_fence3, df_combined["TT4"])
-            df_combined["TT4"] = np.where(df_combined["TT4"] > upper_fence3, upper_fence3, df_combined["TT4"])
-
-            df_combined['T4U'] = np.where(df_combined["T4U"] < lower_fence4, lower_fence4, df_combined["T4U"])
-            df_combined["T4U"] = np.where(df_combined["T4U"] > upper_fence4, upper_fence4, df_combined["T4U"])
-
-            df_combined['FTI'] = np.where(df_combined["FTI"] < lower_fence5, lower_fence5, df_combined["FTI"])
-            df_combined["FTI"] = np.where(df_combined["FTI"] > upper_fence5, upper_fence5, df_combined["FTI"])
-
-            ##################################### MAJOR CLASS CREATION   ############################################################
-
-            df_combined_class_labels = df_combined.copy()
-            df_combined_class_labels["Class_label"] = df_combined_plot['Class']
-
-            df = df_combined_class_labels
-            # Define the major class conditions
-            conditions = [
-                df['Class_label'].isin(['compensated hypothyroid', 'primary hypothyroid', 'secondary hypothyroid']),
-                df['Class_label'].isin(['hyperthyroid', 'T toxic', 'secondary toxic']),
-                df['Class_label'].isin(['replacement therapy', 'underreplacement', 'overreplacement']),
-                df['Class_label'].isin(['goitre']),
-                df['Class_label'].isin(['increased binding protein', 'decreased binding protein']),
-                df['Class_label'].isin(['sick']),
-                df['Class_label'].isin(['discordant'])
-            ]
-
-            # Define the major class labels
-            class_labels = [
-                'hypothyroid',
-                'hyperthyroid',
-                'replacement therapy',
-                'goitre',
-                'binding protein',
-                'sick',
-                'discordant'
-            ]
-
-            # Add the major class column to the dataframe based on the conditions
-            df['major_class'] = np.select(conditions, class_labels, default='negative')
-            df.drop("Class_label", axis=1, inplace=True)
-            df_combined_grouped = df.copy()
-
-            #################################   RESAMPLING  #################################################
-            X = df_combined.drop("Class", axis=1)
-            y = df_combined["Class"]
-
-            categorical_features = ['sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication','sick','pregnant',
-                                    'thyroid_surgery','I131_treatment','query_hypothyroid','query_hyperthyroid','lithium',
-                                    'goitre','tumor','hypopituitary','psych']
-
-            continuous_features = df_combined.drop(categorical_features, axis=1)
-
-            categorical_features_indices = [df_combined.columns.get_loc(col) for col in categorical_features]
-
-            # Create an instance of SMOTENC oversampler
-
-            smote_nc = SMOTENC(categorical_features = categorical_features_indices, random_state=2023)
+            #df_combined = pd.get_dummies(data  = df_combined, columns=['referral_source'], drop_first=True)
+            #df_combined["Class_encoded"] = LabelEncoder().fit_transform(df_combined["Class"])
 
 
-            # Create an instance of RandomOverSampler
-            random_over_sampler = RandomOverSampler(random_state=2023)
+            ############################### OUTLIERS HANDLING ###############################
+
+            #def outliers_fence(col):
+            #    Q1 = df_combined[col].quantile(q=0.25)
+            #    Q3 = df_combined[col].quantile(q=0.75)
+            #    IQR = Q3 - Q1
+
+            #    lower_fence = Q1 - 1.5*IQR
+            #    upper_fence = Q3 + 1.5*IQR
+            #    return lower_fence, upper_fence
+
+            #lower_fence1, upper_fence1 = outliers_fence(col='TSH')
+            #lower_fence2, upper_fence2 = outliers_fence(col='T3')
+            #lower_fence3, upper_fence3 = outliers_fence(col='TT4')
+            #lower_fence4, upper_fence4 = outliers_fence(col='T4U')
+            #lower_fence5, upper_fence5 = outliers_fence(col='FTI')
+
+            ## Winsorize the data just replace outliers with corresponding fence
+
+            #df_combined['TSH'] = np.where(df_combined["TSH"] < lower_fence1, lower_fence1, df_combined["TSH"])
+            #df_combined["TSH"] = np.where(df_combined["TSH"] > upper_fence1, upper_fence1, df_combined["TSH"])
+
+            #df_combined['T3'] = np.where(df_combined["T3"] < lower_fence2, lower_fence2, df_combined["T3"])
+            #df_combined["T3"] = np.where(df_combined["T3"] > upper_fence2, upper_fence2, df_combined["T3"])
+
+            #df_combined['TT4'] = np.where(df_combined["TT4"] < lower_fence3, lower_fence3, df_combined["TT4"])
+            #df_combined["TT4"] = np.where(df_combined["TT4"] > upper_fence3, upper_fence3, df_combined["TT4"])
+
+            #df_combined['T4U'] = np.where(df_combined["T4U"] < lower_fence4, lower_fence4, df_combined["T4U"])
+            #df_combined["T4U"] = np.where(df_combined["T4U"] > upper_fence4, upper_fence4, df_combined["T4U"])
+
+            #df_combined['FTI'] = np.where(df_combined["FTI"] < lower_fence5, lower_fence5, df_combined["FTI"])
+            #df_combined["FTI"] = np.where(df_combined["FTI"] > upper_fence5, upper_fence5, df_combined["FTI"])
+
+            ###################################### MAJOR CLASS CREATION   ############################################################
+
+            #df_combined_class_labels = df_combined.copy()
+            #df_combined_class_labels["Class_label"] = df_combined_plot['Class']
+
+            #df = df_combined_class_labels
+            ## Define the major class conditions
+            #conditions = [
+            #    df['Class_label'].isin(['compensated hypothyroid', 'primary hypothyroid', 'secondary hypothyroid']),
+            #    df['Class_label'].isin(['hyperthyroid', 'T toxic', 'secondary toxic']),
+            #    df['Class_label'].isin(['replacement therapy', 'underreplacement', 'overreplacement']),
+            #    df['Class_label'].isin(['goitre']),
+            #    df['Class_label'].isin(['increased binding protein', 'decreased binding protein']),
+            #    df['Class_label'].isin(['sick']),
+            #    df['Class_label'].isin(['discordant'])
+            #]
+
+            ## Define the major class labels
+            #class_labels = [
+            #    'hypothyroid',
+            #    'hyperthyroid',
+            #    'replacement therapy',
+            #    'goitre',
+            #    'binding protein',
+            #    'sick',
+            #    'discordant'
+            #]
+
+            ## Add the major class column to the dataframe based on the conditions
+            #df['major_class'] = np.select(conditions, class_labels, default='negative')
+            #df.drop("Class_label", axis=1, inplace=True)
+            #df_combined_grouped = df.copy()
+
+            ##################################   RESAMPLING  #################################################
+            #X = df_combined.drop("Class", axis=1)
+            #y = df_combined["Class"]
+
+            #categorical_features = ['sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication','sick','pregnant',
+            #                        'thyroid_surgery','I131_treatment','query_hypothyroid','query_hyperthyroid','lithium',
+            #                        'goitre','tumor','hypopituitary','psych']
+
+            #continuous_features = df_combined.drop(categorical_features, axis=1)
+
+            #categorical_features_indices = [df_combined.columns.get_loc(col) for col in categorical_features]
+
+            ## Create an instance of SMOTENC oversampler
+
+            #smote_nc = SMOTENC(categorical_features = categorical_features_indices, random_state=2023)
 
 
-            # Create an instance of KMeansSMOTE
-            kmeans_smote = KMeansSMOTE(random_state=2023)
+            ## Create an instance of RandomOverSampler
+            #random_over_sampler = RandomOverSampler(random_state=2023)
 
-            
-            X_resampled_random, y_resampled_random = random_over_sampler.fit_resample(X, y)
+            ## Create an instance of KMeansSMOTE
+            #kmeans_smote = KMeansSMOTE(random_state=2023)
 
-            X_resampled_random = pd.DataFrame(data = X_resampled_random, columns = X.columns)
-            y_resampled_random = pd.DataFrame(y_resampled_random, columns= ["Class"])
+            #
+            #X_resampled_random, y_resampled_random = random_over_sampler.fit_resample(X, y)
 
-            df_resample_random = pd.concat([X_resampled_random,y_resampled_random], axis=1)
+            #X_resampled_random = pd.DataFrame(data = X_resampled_random, columns = X.columns)
+            #y_resampled_random = pd.DataFrame(y_resampled_random, columns= ["Class"])
 
-            resample_data_dir = os.path.join(self.base_dataset_path,"Resampled_Dataset")
-            os.makedirs(resample_data_dir, exist_ok=True)
-            resample_data_file_path = os.path.join(resample_data_dir, "ResampleData_major.csv")
+            #df_resample_random = pd.concat([X_resampled_random,y_resampled_random], axis=1)
 
-            df_resample_random.to_csv(resample_data_file_path, index=False)
-            
+            #resample_data_dir = os.path.join(self.base_dataset_path,"Resampled_Dataset")
+            #os.makedirs(resample_data_dir, exist_ok=True)
+            #resample_data_file_path = os.path.join(resample_data_dir, "ResampleData_major.csv")
 
-            #df_combined_grouped.to_csv("dataset/combined_processed_grouped.csv",index=False)
+            #df_resample_random.to_csv(resample_data_file_path, index=False)
+            #
+
+            ##df_combined_grouped.to_csv("dataset/combined_processed_grouped.csv",index=False)
 
 
-            #return df_combined.head()
+            ##return df_combined.head()
         
         except Exception as e:
             raise ThyroidException(e, sys)
@@ -371,63 +370,63 @@ class DataIngestion:
     
 
 
-    def split_data(self):
-        try:
-            
-            file_path = os.path.join(self.base_dataset_path,"Resampled_Dataset","ResampleData_major.csv")
-            
-            logging.info(f"Reading CSV file for Base dataset [{file_path}]")
-            df = pd.read_csv(file_path)
-            
-            logging.info(f"Encoding Major_Class Categories")
+    #def split_data(self):
+    #    try:
+    #        
+    #        file_path = os.path.join(self.base_dataset_path,"Resampled_Dataset","ResampleData_major.csv")
+    #        
+    #        logging.info(f"Reading CSV file for Base dataset [{file_path}]")
+    #        df = pd.read_csv(file_path)
+    #        
+    #        logging.info(f"Encoding Major_Class Categories")
 
-            df["major_class_endcoded"] = LabelEncoder().fit_transform(df["major_class"])
-            
-            X = df.drop(['major_class', 'major_class_endcoded'],axis=1)
-            y = df.drop(['major_class'],axis=1)['major_class_endcoded']
-            
-            logging.info(f"Spliting Dataset into train and test set")
+    #        df["major_class_endcoded"] = LabelEncoder().fit_transform(df["major_class"])
+    #        
+    #        X = df.drop(['major_class', 'major_class_endcoded'],axis=1)
+    #        y = df.drop(['major_class'],axis=1)['major_class_endcoded']
+    #        
+    #        logging.info(f"Spliting Dataset into train and test set")
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
-            
-            start_train_set = None
-            start_test_set = None
-
-
-            start_train_set = pd.concat([X_train,y_train], axis=1)
-            start_test_set = pd.concat([X_test,y_test], axis=1)
-
-            print("done!")
-            print(start_train_set.columns)
-            
-
-            train_file_dir = os.path.join(self.base_dataset_path, "train_set")
-            test_file_dir = os.path.join(self.base_dataset_path, "test_set")
-            
-            print(train_file_dir)
+    #        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
+    #        
+    #        start_train_set = None
+    #        start_test_set = None
 
 
-            if start_train_set is not None:
-        
-                os.makedirs(train_file_dir, exist_ok=True)
-                
-                logging.info(f"Exporting training data to file:[{train_file_dir}]")
-                
-                train_file_path = os.path.join(train_file_dir, "train_set.csv")
-                start_train_set.to_csv(train_file_path, index=False)
-        
-            if start_test_set is not None:
-        
-                os.makedirs(test_file_dir, exist_ok=True)
+    #        start_train_set = pd.concat([X_train,y_train], axis=1)
+    #        start_test_set = pd.concat([X_test,y_test], axis=1)
 
-                logging.info(f"Exporting test data to file:[{test_file_dir}]")
-                test_file_path = os.path.join(test_file_dir, "test_set.csv")
-                
-                start_test_set.to_csv(test_file_path, index=False)            
-            return start_train_set.head().to_html()
-        
-        except Exception as e:                       
-            raise ThyroidException(e, sys)
+    #        print("done!")
+    #        print(start_train_set.columns)
+    #        
+
+    #        train_file_dir = os.path.join(self.base_dataset_path, "train_set")
+    #        test_file_dir = os.path.join(self.base_dataset_path, "test_set")
+    #        
+    #        print(train_file_dir)
+
+
+    #        if start_train_set is not None:
+    #    
+    #            os.makedirs(train_file_dir, exist_ok=True)
+    #            
+    #            logging.info(f"Exporting training data to file:[{train_file_dir}]")
+    #            
+    #            train_file_path = os.path.join(train_file_dir, "train_set.csv")
+    #            start_train_set.to_csv(train_file_path, index=False)
+    #    
+    #        if start_test_set is not None:
+    #    
+    #            os.makedirs(test_file_dir, exist_ok=True)
+
+    #            logging.info(f"Exporting test data to file:[{test_file_dir}]")
+    #            test_file_path = os.path.join(test_file_dir, "test_set.csv")
+    #            
+    #            start_test_set.to_csv(test_file_path, index=False)            
+    #        return start_train_set.head().to_html()
+    #    
+    #    except Exception as e:                       
+    #        raise ThyroidException(e, sys)
         
     
 

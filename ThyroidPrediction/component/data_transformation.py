@@ -1,3 +1,4 @@
+from sklearn.model_selection import train_test_split
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.entity.config_entity import DataTransformationConfig 
@@ -290,13 +291,24 @@ class DataTransformation:
         except Exception as e:
             raise ThyroidException(e,sys) from e
 
+
     def get_resampled_data(self):
         try:
             df_combined_grouped = self.get_target_by_major_class()
 
             #################################   RESAMPLING  #################################################
             X = df_combined_grouped.drop(["Class","Class_encoded",'major_class','major_class_encoded'], axis=1)
-            y = df_combined_grouped["Class_encoded"]
+            y = df_combined_grouped["major_class_encoded"]
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
+
+            ###############################################################
+            # 
+            # Note that we only apply the random oversampler on
+            #  the training data and
+            #  not on the test data.
+            #################################################################
+
 
             categorical_features = ['sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication','sick','pregnant',
                                     'thyroid_surgery','I131_treatment','query_hypothyroid','query_hyperthyroid','lithium',
@@ -306,81 +318,86 @@ class DataTransformation:
 
             categorical_features_indices = [df_combined_grouped.columns.get_loc(col) for col in categorical_features]
 
-            # Create an instance of SMOTENC oversampler
-
-            smote_nc = SMOTENC(categorical_features = categorical_features_indices, random_state=2023)
-
-
+                     
             # Create an instance of RandomOverSampler
             random_over_sampler = RandomOverSampler(random_state=2023)
 
-
-            # Create an instance of KMeansSMOTE
-            kmeans_smote = KMeansSMOTE(random_state=2023)
-
             
-            X_resampled_random, y_resampled_random = random_over_sampler.fit_resample(X, y)
+
+            X_resampled_random, y_resampled_random = random_over_sampler.fit_resample(X_train, y_train)
 
             X_resampled_random = pd.DataFrame(data = X_resampled_random, columns = X.columns)
-            y_resampled_random = pd.DataFrame(y_resampled_random, columns= ["Class_encoded"])
+            y_resampled_random = pd.DataFrame(y_resampled_random, columns= ["major_class_encoded"])
 
             df_resample_random = pd.concat([X_resampled_random,y_resampled_random], axis=1)
 
 
-            class_mapping = {0: 'T toxic',
-                             1: 'compensated hypothyroid',
-                             2: 'decreased binding protein',
-                             3: 'discordant',
-                             4: 'goitre',
-                             5: 'hyperthyroid',
-                             6: 'increased binding protein',
-                             7: 'negative',
-                             8: 'overreplacement',
-                             9: 'primary hypothyroid',
-                             10: 'replacement therapy',
-                             11: 'secondary hypothyroid',
-                             12: 'secondary toxic',
-                             13: 'sick',
-                             14: 'underreplacement'}
-            
-            df_resample_random['Class_label'] = df_resample_random['Class_encoded'].replace(class_mapping)
-
-            # Define the major class conditions
-            conditions = [
-                df_resample_random['Class_label'].isin(['compensated hypothyroid', 'primary hypothyroid', 'secondary hypothyroid']),
-                df_resample_random['Class_label'].isin(['hyperthyroid', 'T toxic', 'secondary toxic']),
-                df_resample_random['Class_label'].isin(['replacement therapy', 'underreplacement', 'overreplacement']),
-                df_resample_random['Class_label'].isin(['goitre']),
-                df_resample_random['Class_label'].isin(['increased binding protein', 'decreased binding protein']),
-                df_resample_random['Class_label'].isin(['sick']),
-                df_resample_random['Class_label'].isin(['discordant'])
-            ]
-
-            # Define the major class labels
-            class_labels = ['hypothyroid', 'hyperthyroid', 'replacement therapy',
-                             'goitre', 'binding protein', 'sick', 'discordant']
-
-            # Add the major class column to the dataframe based on the conditions
-            df_resample_random['major_class'] = np.select(conditions, class_labels, default='negative')
-            #df_resample_random.drop("Class_label", axis=1, inplace=True)
-            
-            #df_combined_grouped = df_resample_random.copy()
-
-            df_resample_random["major_class_encoded"] = LabelEncoder().fit_transform(df_resample_random["major_class"])
+            #class_mapping = {0: 'T toxic',
+            #                 1: 'compensated hypothyroid',
+            #                 2: 'decreased binding protein',
+            #                 3: 'discordant',
+            #                 4: 'goitre',
+            #                 5: 'hyperthyroid',
+            #                 6: 'increased binding protein',
+            #                 7: 'negative',
+            #                 8: 'overreplacement',
+            #                 9: 'primary hypothyroid',
+            #                 10: 'replacement therapy',
+            #                 11: 'secondary hypothyroid',
+            #                 12: 'secondary toxic',
+            #                 13: 'sick',
+            #                 14: 'underreplacement'}
+            #
+            #df_resample_random['Class_label'] = df_resample_random['Class_encoded'].replace(class_mapping)
 
 
-            resample_data_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset")
-            os.makedirs(resample_data_dir, exist_ok=True)
-            resample_data_file_path = os.path.join(resample_data_dir, "ResampleData_major.csv")
+            ## Define the major class conditions
+            #conditions = [
+            #    df_resample_random['Class_label'].isin(['compensated hypothyroid', 'primary hypothyroid', 'secondary hypothyroid']),
+            #    df_resample_random['Class_label'].isin(['hyperthyroid', 'T toxic', 'secondary toxic']),
+            #    df_resample_random['Class_label'].isin(['replacement therapy', 'underreplacement', 'overreplacement']),
+            #    df_resample_random['Class_label'].isin(['goitre']),
+            #    df_resample_random['Class_label'].isin(['increased binding protein', 'decreased binding protein']),
+            #    df_resample_random['Class_label'].isin(['sick']),
+            #    df_resample_random['Class_label'].isin(['discordant'])]
+            #
 
-            df_resample_random.to_csv(resample_data_file_path, index=False)
-            
-                        
+            ## Define the major class labels
+            #class_labels = ['hypothyroid', 'hyperthyroid', 'replacement therapy',
+            #                 'goitre', 'binding protein', 'sick', 'discordant']
+
+            ## Add the major class column to the dataframe based on the conditions
+            #df_resample_random['major_class'] = np.select(conditions, class_labels, default='negative')
+            ##df_resample_random.drop("Class_label", axis=1, inplace=True)
+            #
+            ##df_combined_grouped = df_resample_random.copy()
+
+            #df_resample_random["major_class_encoded"] = LabelEncoder().fit_transform(df_resample_random["major_class"])
+
+
+            #resample_data_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset")
+            #os.makedirs(resample_data_dir, exist_ok=True)
+            #resample_data_file_path = os.path.join(resample_data_dir, "ResampleData_major.csv")
+
+            #df_resample_random.to_csv(resample_data_file_path, index=False)
+
+            train_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","train_resampled")
+            os.makedirs(train_resample_dir, exist_ok=True)
+            train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
+            df_resample_random.to_csv(train_resample_file_path, index=False)
+
+
+            test_non_resampled = pd.concat([X_test,y_test], axis=1)
+            test_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","test_resampled")
+            os.makedirs(test_resample_dir, exist_ok=True)
+            test_non_resample_file_path = os.path.join(test_resample_dir, "test_non_resample_major.csv")
+            test_non_resampled.to_csv(test_non_resample_file_path, index=False)
+
             return df_resample_random.head().to_html()
 
 
         except Exception as e:
-            raise ThyroidException(e,sys)
+            raise ThyroidException(e,sys) from e
 
     def initiate_data_transformation(self):
         try:

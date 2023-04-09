@@ -1,9 +1,11 @@
 from flask import Flask
+from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact
+from ThyroidPrediction.entity.config_entity import DataValidationConfig
 
 
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
-from ThyroidPrediction. component import data_ingestion, data_transformation
+from ThyroidPrediction. component import data_ingestion, data_transformation, data_validation
 app = Flask(__name__)
 
 
@@ -14,7 +16,7 @@ def index():
     
     #return data_ingestion.DataIngestion(data_ingestion_config=data_ingestion).initiate_data_ingestion()
     
-    return data_transformation.DataTransformation().initiate_data_transformation()
+    return data_validation.DataValidation(data_validation_config=DataValidationConfig,data_ingestion_artifact= DataIngestionArtifact).get_and_save_data_drift_report()
 
 if __name__ == "__main__":
     app.run(debug=True)
