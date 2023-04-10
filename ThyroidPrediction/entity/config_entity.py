@@ -9,6 +9,15 @@ DataIngestionConfig = namedtuple("DataIngestionConfig", ["dataset_download_url",
                                                            "ingested_train_dir",
                                                            "ingested_test_dir"])
 
+BaseDataIngestionConfig = namedtuple("BaseDataIngestionConfig", ["raw_data_dir",
+                                                          "processed_data_dir",                                                           
+                                                           "cleaned_data_dir",
+                                                           "resampled_data_dir",
+                                                           "train_resampled_dir",
+                                                           "test_non_resampled_dir",
+                                                           "transformed_data_dir"])
+
+
 DataValidationConfig = namedtuple("DataValidationConfig", ["schema_file_path", "report_file_path", "report_page_file_path"])
 
 DataTransformationConfig = namedtuple("DataTransformationConfig", ["transformed_train_dir",

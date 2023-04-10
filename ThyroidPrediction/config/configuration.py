@@ -1,4 +1,4 @@
-from ThyroidPrediction.entity.config_entity import DataIngestionConfig, DataValidationConfig, DataTransformationConfig, ModelTrainerConfig, ModelEvaluationConfig, ModelPusherConfig, TrainingPipelineConfig
+from ThyroidPrediction.entity.config_entity import DataIngestionConfig,BaseDataIngestionConfig, DataValidationConfig, DataTransformationConfig, ModelTrainerConfig, ModelEvaluationConfig, ModelPusherConfig, TrainingPipelineConfig
 from ThyroidPrediction.util.util import read_yaml_file
 from ThyroidPrediction.constant import *
 from ThyroidPrediction.exception import ThyroidException
@@ -60,6 +60,51 @@ class Configuration:
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
+
+    def get_base_data_ingestion_config(self) -> BaseDataIngestionConfig:
+        try:
+            artifact_dir = self.training_pipeline_config.artifact_dir
+            base_data_ingestion_artifact_dir = os.path.join(artifact_dir, BASE_DATA_INGESTION_ARTIFACT_DIR, self.time_stamp)
+
+            base_data_ingestion_info =  self.config_info[BASE_DATA_INGESTION_CONFIG_KEY]
+            
+            raw_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_RAW_DATA_DIR_KEY]
+                                        )
+            
+            cleaned_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_CLEANED_DATA_DIR_KEY]
+                                        )            
+            
+            processed_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_PROCESSED_DATA_DIR_KEY]
+                                        )
+            
+            resampled_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_RESAMPLED_DATA_DIR_KEY]
+                                        )
+            train_resampled_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_TRAIN_RESAMPLED_DIR_KEY]
+                                        )                               
+
+            test_non_resampled_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_TEST_NON_RESAMPLED_DIR_KEY]
+                                        )
+            trasformed_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+                                        base_data_ingestion_info[BASE_DATA_INGESTION_TRANSFORMED_DATA_DIR_KEY]
+                                        )            
+                        
+            base_data_ingestion_config = BaseDataIngestionConfig(raw_data_dir=raw_data_dir,
+                                                            processed_data_dir=processed_data_dir,
+                                                            cleaned_data_dir=cleaned_data_dir,
+                                                            resampled_data_dir= resampled_data_dir,
+                                                            train_resampled_dir= train_resampled_data_dir,
+                                                            test_non_resampled_dir= test_non_resampled_data_dir,
+                                                            transformed_data_dir= trasformed_data_dir)
+            return base_data_ingestion_config
+
+        except Exception as e:
+            raise ThyroidException(e, sys) from e
 
     def get_data_validation_config(self) -> DataValidationConfig:
         try:

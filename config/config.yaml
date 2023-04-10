@@ -10,6 +10,15 @@ data_ingestion_config:
   ingested_train_dir: train
   ingested_test_dir: test 
 
+base_data_ingestion_config:
+  raw_data_dir: raw_data
+  processed_data_dir: processed_data
+  cleaned_data_dir: cleaned_data
+  resampled_data_dir: resampled_data
+  train_resampled_dir: train_resampled
+  test_non_resampled_dir: test_non_resampled
+  transformed_data_dir: transformed_data
+
 data_validation_config:
   schema_dir: config
   schema_file_name: schema.yaml
@@ -17,7 +26,7 @@ data_validation_config:
   report_page_file_name: report.html
 
 data_transformation_config:
-  #add_bedroom_per_room: true
+  
   transformed_dir: transformed_data
   transformed_train_dir: train
   transformed_test_dir: test
