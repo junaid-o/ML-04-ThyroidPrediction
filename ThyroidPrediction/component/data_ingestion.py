@@ -1,7 +1,7 @@
-from ThyroidPrediction.entity.config_entity import DataIngestionConfig
+from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseDataIngestionConfig
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.logger import logging
-from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact
+from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, BaseDataIngestionArtifact
 import os, sys
 
 import tarfile
@@ -17,13 +17,15 @@ import numpy as np
 from sklearn.impute import SimpleImputer
 from imblearn.over_sampling import SMOTENC,RandomOverSampler,KMeansSMOTE
 
+
 class DataIngestion:
 
-    def __init__(self, data_ingestion_config:DataIngestionConfig):
+    def __init__(self, data_ingestion_config:BaseDataIngestionConfig):
         try:
             logging.info(f"{'='*20} DATA INGESTION LOG STARTED.{'='*20}")
             
-            self.data_ingestion_config = data_ingestion_config
+            #self.data_ingestion_config = data_ingestion_config
+            self.base_data_ingestion_config = data_ingestion_config
             self.base_dataset_path = r"ThyroidPrediction\dataset_base"
     
         except Exception as e:
@@ -143,9 +145,23 @@ class DataIngestion:
         try:
             pd.set_option('display.max_columns', None)
 
-
             # Path to the top-level directory
-            dir_path = "ThyroidPrediction/dataset_base/Raw_Dataset"
+            #dir_path = "ThyroidPrediction/dataset_base/Raw_Dataset"
+
+            dataset_base = self.base_dataset_path
+            raw_data_dir = self.base_data_ingestion_config.raw_data_dir
+            print('=='*20)
+            print(raw_data_dir)
+            print('=='*20)
+            raw_data_dir_path = os.path.join(dataset_base, raw_data_dir)
+            print('=='*20)
+            print(raw_data_dir_path)
+            print('=='*20)            
+            
+            os.makedirs(raw_data_dir, exist_ok=True)
+
+
+
             csv_files = []
 
             columns_list = ['age', 'sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication', 'sick', 'pregnant', 'thyroid_surgery',
@@ -153,10 +169,10 @@ class DataIngestion:
                             'TSH','T3_measured','T3', 'TT4_measured', 'TT4', 'T4U_measured','T4U', 'FTI_measured', 'FTI', 'TBG_measured', 'TBG', 'referral_source',
                             'Class']
 
-            logging.info(f"{'='*20} READING BASE DATASET {'='*20} \n\n Walking Through All Dirs In [ {dir_path} ] for all .data and .test files")
+            logging.info(f"{'='*20} READING BASE DATASET {'='*20} \n\n Walking Through All Dirs In [ {raw_data_dir_path} ] for all .data and .test files")
             
             # Traverse the directory structure recursively
-            for root, dirs, files in os.walk(dir_path):
+            for root, dirs, files in os.walk(raw_data_dir_path):
                 for file in files:
                     #print(files)
                     # Check if the file is a CSV file
@@ -215,12 +231,17 @@ class DataIngestion:
 
             #print("Hypopituitory Uniqu valus",df_combined["hypopituitary"].unique())
 
-            processed_dataset_dir = os.path.join(self.base_dataset_path,"Processed_Dataset","Cleaned_Data")
-            os.makedirs(processed_dataset_dir, exist_ok=True)
+            #processed_dataset_dir = os.path.join(self.base_dataset_path,"Processed_Dataset","Cleaned_Data")
+            #os.makedirs(processed_dataset_dir, exist_ok=True)
 
-            processed_data_file_path = os.path.join(processed_dataset_dir,"df_combined_cleaned.csv")
+            processed_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,"Cleaned_Data")
+            os.makedirs(processed_data_dir, exist_ok=True)
+            
+            #processed_data_file_path = os.path.join(processed_dataset_dir,"df_combined_cleaned.csv")
+            #df_combined.to_csv(processed_data_file_path,index=False)
+
+            processed_data_file_path = os.path.join(processed_data_dir,"df_combined_cleaned.csv")
             df_combined.to_csv(processed_data_file_path,index=False)
-
 
             ########################################    MISSING vALUE IMPUATION    ##########################################################
 
@@ -363,6 +384,8 @@ class DataIngestion:
 
 
             ##return df_combined.head()
+
+            return df_combined.head(10).to_html()
         
         except Exception as e:
             raise ThyroidException(e, sys)

@@ -2,20 +2,20 @@ from datetime import datetime
 import uuid
 import pandas as pd
 from multiprocessing import Process
-from housing.component.model_evaluation import ModelEvaluation
-from housing.component.model_pusher import ModelPusher
-from housing.component.model_trainer import ModelTrainer
-from housing.entity.experiment import Experiment
-from housing.logger import logging
-from housing.exception import HousingException
+from ThyroidPrediction.component.model_evaluation import ModelEvaluation
+from ThyroidPrediction.component.model_pusher import ModelPusher
+from ThyroidPrediction.component.model_trainer import ModelTrainer
+from ThyroidPrediction.entity.experiment import Experiment
+from ThyroidPrediction.logger import logging
+from ThyroidPrediction.exception import ThyroidException
 
-from housing.config.configuration import Configuration
-from housing.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, ModelEvaluationArtifact, ModelPusherArtifact, ModelTrainerArtifact
-from housing.entity.config_entity import DataIngestionConfig
-from housing.component.data_ingestion import DataIngestion
-from housing.component.data_validation import DataValidation
-from housing.component.data_transformation import DataTransformation
-from housing.constant import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME
+from ThyroidPrediction.config.configuration import Configuration
+from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, ModelEvaluationArtifact, ModelPusherArtifact, ModelTrainerArtifact
+from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseDataIngestionConfig
+from ThyroidPrediction.component.data_ingestion import DataIngestion
+from ThyroidPrediction.component.data_validation import DataValidation
+from ThyroidPrediction.component.data_transformation import DataTransformation
+from ThyroidPrediction.constant import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME
 
 import os, sys
 from threading import Thread
@@ -47,7 +47,7 @@ class Pipeline(Thread):
             self.config = config
 
         except Exception as e:
-            raise HousingException(e,sys) from e
+            raise ThyroidException(e,sys) from e
         
 
     def start_data_ingestion(self) -> DataIngestionArtifact:
@@ -58,7 +58,7 @@ class Pipeline(Thread):
             return data_ingestion.initiate_data_ingestion()
 
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
 
     def start_data_validation(self, data_ingestion_artifact:DataIngestionArtifact) -> DataValidationArtifact:
@@ -68,7 +68,7 @@ class Pipeline(Thread):
 
             return data_validation.initiate_data_validation()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
 
     def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> DataTransformationArtifact:
@@ -80,7 +80,7 @@ class Pipeline(Thread):
             
             return data_transformation.initiate_data_transformation()
         except Exception as e:
-            raise HousingException(e, sys)
+            raise ThyroidException(e, sys)
 
     def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
         try:
@@ -88,7 +88,7 @@ class Pipeline(Thread):
                                          data_transformation_artifact = data_transformation_artifact)
             return model_trainer.initiate_model_trainer()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
 
     def start_model_evaluation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ModelTrainerArtifact) -> ModelEvaluationArtifact:
@@ -100,7 +100,7 @@ class Pipeline(Thread):
             
             return model_eval.initiate_model_evaluation()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
     def start_model_pusher(self, model_eval_artifact: ModelEvaluationArtifact) -> ModelPusherArtifact:
         try:
@@ -109,7 +109,7 @@ class Pipeline(Thread):
             
             return model_pusher.initiate_model_pusher()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
 
     def run_pipeline(self):
@@ -185,7 +185,7 @@ class Pipeline(Thread):
             self.save_experiment()
 
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
 
     def run(self):
@@ -221,7 +221,7 @@ class Pipeline(Thread):
                 print("First start experiment")
 
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
 
     @classmethod
     def get_experiments_status(cls, limit: int = 5) -> pd.DataFrame:
@@ -239,5 +239,5 @@ class Pipeline(Thread):
             else:
                 return pd.DataFrame()
         except Exception as e:
-            raise HousingException(e, sys) from e
+            raise ThyroidException(e, sys) from e
   

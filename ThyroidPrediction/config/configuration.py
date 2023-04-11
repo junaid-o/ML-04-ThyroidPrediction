@@ -68,9 +68,11 @@ class Configuration:
 
             base_data_ingestion_info =  self.config_info[BASE_DATA_INGESTION_CONFIG_KEY]
             
-            raw_data_dir = os.path.join(base_data_ingestion_artifact_dir,
-                                        base_data_ingestion_info[BASE_DATA_INGESTION_RAW_DATA_DIR_KEY]
-                                        )
+            raw_data_dir = base_data_ingestion_info[BASE_DATA_INGESTION_RAW_DATA_DIR_KEY]
+
+            #raw_data_dir = os.path.join(base_data_ingestion_artifact_dir,
+            #                            base_data_ingestion_info[BASE_DATA_INGESTION_RAW_DATA_DIR_KEY]
+            #                            )
             
             cleaned_data_dir = os.path.join(base_data_ingestion_artifact_dir,
                                         base_data_ingestion_info[BASE_DATA_INGESTION_CLEANED_DATA_DIR_KEY]
