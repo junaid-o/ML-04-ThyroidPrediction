@@ -18,18 +18,18 @@ from sklearn.impute import SimpleImputer
 from imblearn.over_sampling import SMOTENC,RandomOverSampler,KMeansSMOTE
 
 
-class DataIngestion:
-
-    def __init__(self, data_ingestion_config:BaseDataIngestionConfig):
-        try:
-            logging.info(f"{'='*20} DATA INGESTION LOG STARTED.{'='*20}")
-            
-            #self.data_ingestion_config = data_ingestion_config
-            self.base_data_ingestion_config = data_ingestion_config
-            self.base_dataset_path = r"ThyroidPrediction\dataset_base"
-    
-        except Exception as e:
-            raise ThyroidException(e, sys) from e
+#class DataIngestion:
+#
+#   def __init__(self, data_ingestion_config:BaseDataIngestionConfig):
+#       try:
+#           logging.info(f"{'='*20} DATA INGESTION LOG STARTED.{'='*20}")
+#           
+#           #self.data_ingestion_config = data_ingestion_config
+#           self.base_data_ingestion_config = data_ingestion_config
+#           self.base_dataset_path = r"ThyroidPrediction\dataset_base"
+#   
+#       except Exception as e:
+#           raise ThyroidException(e, sys) from e
 
 
     #def download_housing_data(self) -> str:
@@ -141,6 +141,21 @@ class DataIngestion:
     #   except Exception as e:
     #       raise ThyroidException(e, sys) from e
         
+
+class DataIngestion:
+
+    def __init__(self, data_ingestion_config:BaseDataIngestionConfig):
+        try:
+            logging.info(f"{'='*20} DATA INGESTION LOG STARTED.{'='*20}")
+            
+            #self.data_ingestion_config = data_ingestion_config
+            self.base_data_ingestion_config = data_ingestion_config
+            self.base_dataset_path = r"ThyroidPrediction\dataset_base"
+    
+        except Exception as e:
+            raise ThyroidException(e, sys) from e
+        
+
     def get_base_data(self):
         try:
             pd.set_option('display.max_columns', None)
@@ -190,6 +205,8 @@ class DataIngestion:
                         csv_files.append(df)
                         # Do something with the DataFrame
 
+            logging.info(f"Total [ {len(csv_files)} ] files read in all dirs in [ {raw_data_dir_path} ]")
+            
             print("Number of csv files",len(csv_files))
             
             df_combined = pd.DataFrame()
@@ -207,6 +224,8 @@ class DataIngestion:
             #print("Hypopituitory unique values before cleaning",df_combined['hypopituitary'].unique())
             ###############################################################################################
 
+            logging.info(f"Handling Duplicats and Missing Values")
+
             df_combined.drop_duplicates(inplace=True)
             df_combined["Class"].replace(to_replace= r"[.|0-9]",value="", regex=True, inplace=True)
             df_combined = df_combined.drop(['TSH_measured','T3_measured','TT4_measured','T4U_measured','FTI_measured','TBG_measured'], axis=1)
@@ -220,11 +239,10 @@ class DataIngestion:
                 if missing_count != 0:
                     print(column,missing_count)
                     df_combined[column] = df_combined[column].replace("?", np.nan)
-            print('====='*28)
 
+            # The entir TBG column have missing values so dropping it            
             df_combined = df_combined.drop(["TBG"], axis=1)
             
-
 
             columns_float = ['age', 'TSH', 'T3', 'TT4','T4U', 'FTI']
 
@@ -237,20 +255,23 @@ class DataIngestion:
             #os.makedirs(processed_dataset_dir, exist_ok=True)
 
             
-            logging.info(f"Exporting Combined and Cleaned Data to path: [{os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir)}]")
+            logging.info(f"Exporting Combined and semi-Cleaned Data to path: [{os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir)}]")
 
-            processed_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir)
+            processed_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir,"raw_data_merged")
             os.makedirs(processed_data_dir, exist_ok=True)
             
             #processed_data_file_path = os.path.join(processed_dataset_dir,"df_combined_cleaned.csv")
             #df_combined.to_csv(processed_data_file_path,index=False)
 
-            processed_data_file_path = os.path.join(processed_data_dir,"df_combined_cleaned.csv")
+            processed_data_file_path = os.path.join(processed_data_dir, "df_combined.csv")
             df_combined.to_csv(processed_data_file_path,index=False)
 
-            logging.info("Cleaned Data Export Done!")
+            logging.info("Merged Data Export Done!")
 
-            print("Cleaned File Exported to:", processed_data_file_path)
+            print("====== processed_data_file_path===="*5)
+            print(processed_data_file_path)
+            print("===================================="*5)
+
             ########################################    MISSING vALUE IMPUATION    ##########################################################
 
             #df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
@@ -389,86 +410,258 @@ class DataIngestion:
             #
 
             ##df_combined_grouped.to_csv("dataset/combined_processed_grouped.csv",index=False)
-
-
-            ##return df_combined.head()
-
             #return df_combined.head(10).to_html()
+            return df_combined
         
         except Exception as e:
             raise ThyroidException(e, sys)
 
-    
+
+    def get_data_transformer_object(self):
+
+        try:
+            
+            #processesd_data_dir_path = self.processed_data_dir_path
+            #cleaned_data_file_path = os.path.join(self.cleaned_data_dir,"df_combined_cleaned.csv")
+            
+            #print("===== Cleand Data File Path ======"*20)
+            #print("\n\n",cleaned_data_file_path)
+            
+            #df_combined = pd.read_csv(cleaned_data_file_path)
+
+            df_combined = self.get_base_data()
+
+            #######################################    MISSING VALUE IMPUATION    ##########################################################
+            logging.info(f"Missing Value Imputation and Handling Categorical Variables")
+
+            df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
+            df_combined['age'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["age"]].values)
+
+            df_combined['TSH'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TSH"]].values)
+            df_combined['T3'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T3"]].values)
+            df_combined['TT4'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TT4"]].values)
+            df_combined['T4U'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T4U"]].values)
+            df_combined['FTI'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["FTI"]].values)
 
 
-    #def split_data(self):
-    #    try:
-    #        
-    #        file_path = os.path.join(self.base_dataset_path,"Resampled_Dataset","ResampleData_major.csv")
-    #        
-    #        logging.info(f"Reading CSV file for Base dataset [{file_path}]")
-    #        df = pd.read_csv(file_path)
-    #        
-    #        logging.info(f"Encoding Major_Class Categories")
+            ###################### HANDLINNG CATEGOICAL VARIABLES ###########################
 
-    #        df["major_class_endcoded"] = LabelEncoder().fit_transform(df["major_class"])
-    #        
-    #        X = df.drop(['major_class', 'major_class_endcoded'],axis=1)
-    #        y = df.drop(['major_class'],axis=1)['major_class_endcoded']
-    #        
-    #        logging.info(f"Spliting Dataset into train and test set")
+            df_combined_plot = df_combined.copy()
+            
+            columns_list = df_combined.columns.to_list()
+            
+            for feature in columns_list:
+                if len(df_combined[feature].unique()) <= 3:
 
-    #        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
-    #        
-    #        start_train_set = None
-    #        start_test_set = None
+                    #print(df_combined[feature].unique() )
+                    value1 = df_combined[feature].unique()[0]
+                    value2 = df_combined[feature].unique()[1]
+
+                    df_combined[feature] = df_combined[feature].map({f'{value1}':0, f'{value2}':1})
+                    
+                    print(feature, df_combined[feature].unique())
+
+            df_combined = pd.get_dummies(data  = df_combined, columns=['referral_source'], drop_first=True)
+            df_combined["Class_encoded"] = LabelEncoder().fit_transform(df_combined["Class"])
 
 
-    #        start_train_set = pd.concat([X_train,y_train], axis=1)
-    #        start_test_set = pd.concat([X_test,y_test], axis=1)
+            return df_combined, df_combined_plot
+        except Exception as e:
+            raise ThyroidException(e,sys) from e
+       
 
-    #        print("done!")
-    #        print(start_train_set.columns)
-    #        
+    def outliers_handling(self):
+        try:
 
-    #        train_file_dir = os.path.join(self.base_dataset_path, "train_set")
-    #        test_file_dir = os.path.join(self.base_dataset_path, "test_set")
-    #        
-    #        print(train_file_dir)
+            ############################## OUTLIERS HANDLING ###############################
+
+            df_combined, df_combined_plot = self.get_data_transformer_object()
+            
+            logging.info(f"Handling Outliers")
+
+            def outliers_fence(col):
+                Q1 = df_combined[col].quantile(q=0.25)
+                Q3 = df_combined[col].quantile(q=0.75)
+                IQR = Q3 - Q1
+
+                lower_fence = Q1 - 1.5*IQR
+                upper_fence = Q3 + 1.5*IQR
+                return lower_fence, upper_fence
+
+            lower_fence1, upper_fence1 = outliers_fence(col='TSH')
+            lower_fence2, upper_fence2 = outliers_fence(col='T3')
+            lower_fence3, upper_fence3 = outliers_fence(col='TT4')
+            lower_fence4, upper_fence4 = outliers_fence(col='T4U')
+            lower_fence5, upper_fence5 = outliers_fence(col='FTI')
+
+            # Winsorize the data just replace outliers with corresponding fence
+
+            df_combined['TSH'] = np.where(df_combined["TSH"] < lower_fence1, lower_fence1, df_combined["TSH"])
+            df_combined["TSH"] = np.where(df_combined["TSH"] > upper_fence1, upper_fence1, df_combined["TSH"])
+
+            df_combined['T3'] = np.where(df_combined["T3"] < lower_fence2, lower_fence2, df_combined["T3"])
+            df_combined["T3"] = np.where(df_combined["T3"] > upper_fence2, upper_fence2, df_combined["T3"])
+
+            df_combined['TT4'] = np.where(df_combined["TT4"] < lower_fence3, lower_fence3, df_combined["TT4"])
+            df_combined["TT4"] = np.where(df_combined["TT4"] > upper_fence3, upper_fence3, df_combined["TT4"])
+
+            df_combined['T4U'] = np.where(df_combined["T4U"] < lower_fence4, lower_fence4, df_combined["T4U"])
+            df_combined["T4U"] = np.where(df_combined["T4U"] > upper_fence4, upper_fence4, df_combined["T4U"])
+
+            df_combined['FTI'] = np.where(df_combined["FTI"] < lower_fence5, lower_fence5, df_combined["FTI"])
+            df_combined["FTI"] = np.where(df_combined["FTI"] > upper_fence5, upper_fence5, df_combined["FTI"])
+            
+            logging.info(f"Outliers Handling DOne")
+
+            return df_combined, df_combined_plot
+                
+        except Exception as e:
+            raise ThyroidException(e,sys) from e   
+
+    def get_target_by_major_class(self):
+        try:
+
+            ##################################### MAJOR CLASS CREATION   ############################################################
+            
+            df_combined_class_labels, df_combined_plot = self.outliers_handling()
+            df_combined_class_labels["Class_label"] = df_combined_plot['Class']
+            
+            logging.info(f"Grouping Class lablels into major categories")
+            
+            df = df_combined_class_labels
+            # Define the major class conditions
+            conditions = [
+                df['Class_label'].isin(['compensated hypothyroid', 'primary hypothyroid', 'secondary hypothyroid']),
+                df['Class_label'].isin(['hyperthyroid', 'T toxic', 'secondary toxic']),
+                df['Class_label'].isin(['replacement therapy', 'underreplacement', 'overreplacement']),
+                df['Class_label'].isin(['goitre']),
+                df['Class_label'].isin(['increased binding protein', 'decreased binding protein']),
+                df['Class_label'].isin(['sick']),
+                df['Class_label'].isin(['discordant'])
+            ]
+
+            # Define the major class labels
+            class_labels = [
+                'hypothyroid',
+                'hyperthyroid',
+                'replacement therapy',
+                'goitre',
+                'binding protein',
+                'sick',
+                'discordant'
+            ]
+
+            # Add the major class column to the dataframe based on the conditions
+            df['major_class'] = np.select(conditions, class_labels, default='negative')
+            df.drop("Class_label", axis=1, inplace=True)
+            
+            df_combined_grouped = df.copy()
+            
+            df_combined_grouped["major_class_encoded"] = LabelEncoder().fit_transform(df_combined_grouped["major_class"])
+            
+
+            transformed_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir,"processed_data","Cleaned_transformed")
+            os.makedirs(transformed_data_dir, exist_ok=True)
+
+            transformed_data_file_path = os.path.join(transformed_data_dir,"df_transformed_major_class.csv")
+
+            logging.info(f"Exporting Grouped adn Cleaned Data to path: [ {transformed_data_file_path} ]")
+
+            df_combined_grouped.to_csv(transformed_data_file_path, index=False)
 
 
-    #        if start_train_set is not None:
-    #    
-    #            os.makedirs(train_file_dir, exist_ok=True)
-    #            
-    #            logging.info(f"Exporting training data to file:[{train_file_dir}]")
-    #            
-    #            train_file_path = os.path.join(train_file_dir, "train_set.csv")
-    #            start_train_set.to_csv(train_file_path, index=False)
-    #    
-    #        if start_test_set is not None:
-    #    
-    #            os.makedirs(test_file_dir, exist_ok=True)
+            return df_combined_grouped
+        
+        except Exception as e:
+            raise ThyroidException(e,sys) from e
 
-    #            logging.info(f"Exporting test data to file:[{test_file_dir}]")
-    #            test_file_path = os.path.join(test_file_dir, "test_set.csv")
-    #            
-    #            start_test_set.to_csv(test_file_path, index=False)            
-    #        return start_train_set.head().to_html()
-    #    
-    #    except Exception as e:                       
-    #        raise ThyroidException(e, sys)
+
+    def split_data(self):
+        try:
+            
+            #file_path = os.path.join(self.base_dataset_path,"Resampled_Dataset","ResampleData_major.csv")
+            
+            #logging.info(f"Reading CSV file for Base dataset [{file_path}]")
+            #df = pd.read_csv(file_path)
+            
+            #logging.info(f"Encoding Major_Class Categories")
+            #df["major_class_endcoded"] = LabelEncoder().fit_transform(df["major_class"])
+            
+            #X = df.drop(['major_class', 'major_class_endcoded'],axis=1)
+            #y = df.drop(['major_class'],axis=1)['major_class_endcoded']
+            
+            #logging.info(f"Spliting Dataset into train and test set")
+            #X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
+            
+            
+            df_combined_grouped = self.get_target_by_major_class()
+
+            logging.info(f"Splitting Data into train and test set")
+
+            #################################   DATA SPLIT BEFORE RESAMPLING  #################################################
+            X = df_combined_grouped.drop(["Class","Class_encoded",'major_class','major_class_encoded'], axis=1)
+            y = df_combined_grouped["major_class_encoded"]
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
+
+            start_train_set = None
+            start_test_set = None
+            start_train_set = pd.concat([X_train,y_train], axis=1)
+            start_test_set = pd.concat([X_test,y_test], axis=1)
+            
+            
+            print(start_train_set.columns)
+            
+            split_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir,"processed_data","split_data")
+            train_file_dir = os.path.join(split_data_dir, "train_set")
+            test_file_dir = os.path.join(split_data_dir, "test_set")
+            
+            print("==== train_file_dir ======"*20)
+            print(train_file_dir)
+            print("=========================="*20)
+            
+            if start_train_set is not None:
+
+                os.makedirs(train_file_dir, exist_ok=True)
+                
+                logging.info(f"Exporting training data to file:[{train_file_dir}]")
+                
+                train_file_path = os.path.join(train_file_dir, "train.csv")
+                start_train_set.to_csv(train_file_path, index=False)
+        
+            if start_test_set is not None:
+            
+                os.makedirs(test_file_dir, exist_ok=True)
+                logging.info(f"Exporting test data to file:[{test_file_dir}]")
+                test_file_path = os.path.join(test_file_dir, "test.csv")
+                
+                start_test_set.to_csv(test_file_path, index=False)     
+            
+            logging.info(f"Data Split Done!")
+            
+            #################################   Returning DataIngestionArtifact#################################################
+            data_ingestion_artifact = DataIngestionArtifact(train_file_path=train_file_path, test_file_path=test_file_path,
+                                                            is_ingested=True, message= f"DataIngestion Completed Successfully")
+            
+            logging.info(f"Data Ingestion Artifact:[{data_ingestion_artifact}]")
+            return data_ingestion_artifact
+
+        except Exception as e:                       
+            raise ThyroidException(e, sys)
         
     
-
 
     def initiate_data_ingestion(self):
        try:
            #tgz_file_path = self.download_housing_data()
            #self.extract_tgz_file(tgz_file_path=tgz_file_path)
            
-           #return self.split_data()
-           return self.get_base_data()
+           self.get_base_data()
+           self.get_data_transformer_object()
+           self.outliers_handling()
+           self.get_target_by_major_class()
+           
+           return self.split_data()
 
        except Exception as e:
            raise ThyroidException(e, sys) from e
@@ -476,5 +669,5 @@ class DataIngestion:
     
     def __del__(self):
 
-        logging.info(f"{'='*20}Ingestion log completed {'='*20}\n\n")
+        logging.info(f"{'='*20} Ingestion log completed {'='*20}\n\n")
     

@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.entity.config_entity import BaseDataIngestionConfig, BaseDataTransformationConfig, DataTransformationConfig 
-from ThyroidPrediction.entity.artifact_entity import BaseDataIngestionArtifact, DataIngestionArtifact, DataValidationArtifact,DataTransformationArtifact
+from ThyroidPrediction.entity.artifact_entity import BaseDataIngestionArtifact, BaseDataTransformationArtifact, DataIngestionArtifact, DataValidationArtifact,DataTransformationArtifact
 from ThyroidPrediction.constant import *
 from ThyroidPrediction.util.util import read_yaml_file, save_object, save_numpy_array_data, load_data
 
@@ -144,7 +144,7 @@ class DataTransformation:
     def __init__(self, data_transformation_config: BaseDataTransformationConfig, data_ingestion_artifact: BaseDataIngestionArtifact, base_data_ingestion: BaseDataIngestionConfig):
     
         try:
-            logging.info(f"{'>>' * 30}Data Transformation log started.{'<<' * 30} ")
+            logging.info(f"{'>>' * 30} Data Transformation log started {'<<' * 30} ")
     
             self.data_transformation_config= data_transformation_config
             self.data_ingestion_artifact = data_ingestion_artifact
@@ -418,8 +418,14 @@ class DataTransformation:
             #test_non_resample_file_path = os.path.join(test_resample_dir, "test_non_resample_major.csv")
             #test_non_resampled.to_csv(test_non_resample_file_path, index=False)
 
-            return df_resample_random.head().to_html()
+            #return df_resample_random.head().to_html()
+            data_transformation_artifact = BaseDataTransformationArtifact(is_transformed=True, message="Data transformation successfull.",
+                                                                          transformed_resampled_train_file_path = train_resample_file_path,
+                                                                          transformed_non_resampled_test_file_path= test_non_resample_file_path)
 
+            logging.info(f"Data transformationa artifact: {data_transformation_artifact}")
+
+            return data_transformation_artifact
 
         except Exception as e:
             raise ThyroidException(e,sys) from e

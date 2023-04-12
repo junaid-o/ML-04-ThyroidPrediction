@@ -173,9 +173,8 @@ class Configuration:
 
             data_transformation_artifact_dir=os.path.join(artifact_dir, DATA_TRANSFORMATION_ARTIFACT_DIR, self.time_stamp)
 
-            data_transformation_config_info=self.config_info[DATA_TRANSFORMATION_CONFIG_KEY]
+            data_transformation_config_info=self.config_info[DATA_TRANSFORMATION_CONFIG_KEY]          
 
-            add_bedroom_per_room=data_transformation_config_info[DATA_TRANSFORMATION_ADD_BEDROOM_PER_ROOM_KEY]
 
             preprocessed_object_file_path = os.path.join(data_transformation_artifact_dir,
                                                          data_transformation_config_info[DATA_TRANSFORMATION_PREPROCESSING_DIR_KEY],

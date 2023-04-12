@@ -184,7 +184,7 @@ class DataValidation:
 
     def __init__(self, data_validation_config:DataValidationConfig, data_ingestion_artifact: DataIngestionArtifact):
         try:
-            
+            logging.info(f"{'='*20} DATA VALIDATION LOG STARTED. {'='*20}")
             self.data_validation_config = data_validation_config
             self.data_ingestion_artifact = data_ingestion_artifact
             
@@ -202,8 +202,12 @@ class DataValidation:
             training_file_path = self.data_ingestion_artifact.train_file_path
             testing_file_path = self.data_ingestion_artifact.test_file_path
 
-            train_df = pd.read_csv(self.training_file_path)
-            test_df = pd.read_csv(self.testing_file_path)
+            print("==== Validation:  training file path ===="*4)
+            print(f"{training_file_path}")
+            print("=================="*4)
+            
+            train_df = pd.read_csv(training_file_path)
+            test_df = pd.read_csv(testing_file_path)
 
             #return train_df, test_df
             return train_df, test_df
@@ -219,6 +223,10 @@ class DataValidation:
 
             train_file_path = self.data_ingestion_artifact.train_file_path
             test_file_path = self.data_ingestion_artifact.test_file_path
+
+            print("==== Validation 2:  training file path ===="*4)
+            print(f"{train_file_path}")
+            print("=================="*4)
 
             #train_file_path = self.training_file_path
             #test_file_path = self.testing_file_path
@@ -353,4 +361,8 @@ class DataValidation:
 
             return data_validation_artifact
         except Exception as e:
-            raise ThyroidException(e, sys) from e         
+            raise ThyroidException(e, sys) from e 
+
+
+    def __del__(self):
+        logging.info(f"{'>>'*30} Data Validation log completed {'<<'*30} \n\n")

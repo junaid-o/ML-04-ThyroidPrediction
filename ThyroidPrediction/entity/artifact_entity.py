@@ -9,6 +9,9 @@ BaseDataIngestionArtifact =  namedtuple("BaseDataIngestionArtifact",
 DataValidationArtifact = namedtuple("DataValidationArtifact",
                                     ["schema_file_path", "report_file_path", "report_page_file_path", "is_validated", "message"])
 
+BaseDataTransformationArtifact = namedtuple("BaseDataTransformationArtifact",
+                                        ["is_transformed", "message", "transformed_resampled_train_file_path",
+                                         "transformed_non_resampled_test_file_path"])
 
 DataTransformationArtifact = namedtuple("DataTransformationArtifact",
                                         ["is_transformed", "message", "transformed_train_file_path",

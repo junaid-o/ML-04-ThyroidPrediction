@@ -10,7 +10,7 @@ from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
 
 from ThyroidPrediction.config.configuration import Configuration
-from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, ModelEvaluationArtifact, ModelPusherArtifact, ModelTrainerArtifact
+from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, BaseDataTransformationArtifact, ModelEvaluationArtifact, ModelPusherArtifact, ModelTrainerArtifact
 from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseDataIngestionConfig
 from ThyroidPrediction.component.data_ingestion import DataIngestion
 from ThyroidPrediction.component.data_validation import DataValidation
@@ -71,11 +71,22 @@ class Pipeline(Thread):
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
+    #def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> DataTransformationArtifact:
+    #def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> BaseDataTransformationArtifact:
 
-    def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> DataTransformationArtifact:
+    #    try:
+    #        data_transformation = DataTransformation(data_transformation_config=self.config.get_data_transformation_config(),
+    #                                                 data_ingestion_artifact=data_ingestion_artifact,
+    #                                                 data_validation_artifact=data_validation_artifact)
+    #        
+    #        return data_transformation.initiate_data_transformation()
+    #    except Exception as e:
+    #        raise ThyroidException(e, sys)
+
+    def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> BaseDataTransformationArtifact:
 
         try:
-            data_transformation = DataTransformation(data_transformation_config=self.config.get_data_transformation_config(),
+            data_transformation = DataTransformation(data_transformation_config=self.config.get_base_data_transformation_config(),
                                                      data_ingestion_artifact=data_ingestion_artifact,
                                                      data_validation_artifact=data_validation_artifact)
             
@@ -83,7 +94,8 @@ class Pipeline(Thread):
         except Exception as e:
             raise ThyroidException(e, sys)
 
-    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+    #def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+    def start_model_trainer(self, data_transformation_artifact: BaseDataTransformationArtifact) -> ModelTrainerArtifact:
         try:
             model_trainer = ModelTrainer(model_trainer_config=self.config.get_model_trainer_config(),
                                          data_transformation_artifact = data_transformation_artifact)
