@@ -37,10 +37,12 @@ BASE_DATA_INGESTION_ARTIFACT_DIR = "base_data_ingestion"
 BASE_DATA_INGESTION_RAW_DATA_DIR_KEY = "raw_data_dir"
 BASE_DATA_INGESTION_PROCESSED_DATA_DIR_KEY = "processed_data_dir"
 BASE_DATA_INGESTION_CLEANED_DATA_DIR_KEY = "cleaned_data_dir"
-BASE_DATA_INGESTION_RESAMPLED_DATA_DIR_KEY = "resampled_data_dir"
-BASE_DATA_INGESTION_TRAIN_RESAMPLED_DIR_KEY = "train_resampled_dir"
-BASE_DATA_INGESTION_TEST_NON_RESAMPLED_DIR_KEY = "test_non_resampled_dir"
-BASE_DATA_INGESTION_TRANSFORMED_DATA_DIR_KEY = "transformed_data_dir"
+
+BASE_DATA_TRANSFORMATION_CONFIG_KEY = "base_data_transformation_config"
+BASE_DATA_TRANSFORMATION_RESAMPLED_DATA_DIR_KEY = "resampled_data_dir"
+BASE_DATA_TRANSFORMATION_TRAIN_RESAMPLED_DIR_KEY = "train_resampled_dir"
+BASE_DATA_TRANSFORMATION_TEST_NON_RESAMPLED_DIR_KEY = "test_non_resampled_dir"
+BASE_DATA_TRANSFORMATION_DATA_DIR = "transformed_data_dir"
 
 # Data Validation related variables
 DATA_VALIDATION_CONFIG_KEY = "data_validation_config"

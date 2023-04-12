@@ -1,8 +1,8 @@
 from sklearn.model_selection import train_test_split
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.logger import logging
-from ThyroidPrediction.entity.config_entity import DataTransformationConfig 
-from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact,DataTransformationArtifact
+from ThyroidPrediction.entity.config_entity import BaseDataIngestionConfig, BaseDataTransformationConfig, DataTransformationConfig 
+from ThyroidPrediction.entity.artifact_entity import BaseDataIngestionArtifact, DataIngestionArtifact, DataValidationArtifact,DataTransformationArtifact
 from ThyroidPrediction.constant import *
 from ThyroidPrediction.util.util import read_yaml_file, save_object, save_numpy_array_data, load_data
 
@@ -141,15 +141,20 @@ from cgi import test
 
 class DataTransformation:
 
-    def __init__(self):
+    def __init__(self, data_transformation_config: BaseDataTransformationConfig, data_ingestion_artifact: BaseDataIngestionArtifact, base_data_ingestion: BaseDataIngestionConfig):
     
         try:
             logging.info(f"{'>>' * 30}Data Transformation log started.{'<<' * 30} ")
     
-            #self.data_transformation_config= data_transformation_config
-            #self.data_ingestion_artifact = data_ingestion_artifact
+            self.data_transformation_config= data_transformation_config
+            self.data_ingestion_artifact = data_ingestion_artifact
             #self.data_validation_artifact = data_validation_artifact
-            self.processed_data_dir_path = "ThyroidPrediction/dataset_base/Processed_Dataset"
+            
+            self.processed_data_dir_path = base_data_ingestion.processed_data_dir
+            #self.processed_data_dir_path = "ThyroidPrediction/dataset_base/Processed_Dataset"
+
+            self.cleaned_data_dir = base_data_ingestion.cleaned_data_dir
+            
         except Exception as e:
             raise ThyroidException(e,sys) from e
 
@@ -157,8 +162,12 @@ class DataTransformation:
     def get_data_transformer_object(self):
 
         try:
+            
             processesd_data_dir_path = self.processed_data_dir_path
-            cleaned_data_file_path = os.path.join(processesd_data_dir_path, "Cleaned_Data","df_combined_cleaned.csv")
+            cleaned_data_file_path = os.path.join(self.cleaned_data_dir,"df_combined_cleaned.csv")
+            
+            print("===== Cleand Data File Path ======"*20)
+            print("\n\n",cleaned_data_file_path)
             
             df_combined = pd.read_csv(cleaned_data_file_path)
 
@@ -278,9 +287,10 @@ class DataTransformation:
             df.drop("Class_label", axis=1, inplace=True)
             
             df_combined_grouped = df.copy()
-
+            
             df_combined_grouped["major_class_encoded"] = LabelEncoder().fit_transform(df_combined_grouped["major_class"])
-            transformed_data_dir = os.path.join(self.processed_data_dir_path,"Transformed_Data")
+            transformed_data_dir = os.path.join(self.data_transformation_config.transformed_data_dir)
+            #transformed_data_dir = os.path.join(self.processed_data_dir_path,"Transformed_Data")
             os.makedirs(transformed_data_dir, exist_ok=True)
 
             transformed_data_file_path = os.path.join(transformed_data_dir,"df_transformed_major_class.csv")
@@ -380,18 +390,33 @@ class DataTransformation:
             #resample_data_file_path = os.path.join(resample_data_dir, "ResampleData_major.csv")
 
             #df_resample_random.to_csv(resample_data_file_path, index=False)
-
-            train_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","train_resampled")
+            
+            ##############################################################################################################
+            ############################################################################################################
+            train_resample_dir = os.path.join(self.data_transformation_config.train_resampled_dir)
             os.makedirs(train_resample_dir, exist_ok=True)
             train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
             df_resample_random.to_csv(train_resample_file_path, index=False)
 
 
             test_non_resampled = pd.concat([X_test,y_test], axis=1)
-            test_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","test_resampled")
+            test_resample_dir = os.path.join(self.data_transformation_config.test_non_resampled_dir)
             os.makedirs(test_resample_dir, exist_ok=True)
             test_non_resample_file_path = os.path.join(test_resample_dir, "test_non_resample_major.csv")
             test_non_resampled.to_csv(test_non_resample_file_path, index=False)
+
+            #############################################################################################################
+            #train_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","train_resampled")
+            #os.makedirs(train_resample_dir, exist_ok=True)
+            #train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
+            #df_resample_random.to_csv(train_resample_file_path, index=False)
+
+
+            #test_non_resampled = pd.concat([X_test,y_test], axis=1)
+            #test_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","test_resampled")
+            #os.makedirs(test_resample_dir, exist_ok=True)
+            #test_non_resample_file_path = os.path.join(test_resample_dir, "test_non_resample_major.csv")
+            #test_non_resampled.to_csv(test_non_resample_file_path, index=False)
 
             return df_resample_random.head().to_html()
 

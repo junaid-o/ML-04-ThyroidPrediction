@@ -8,9 +8,7 @@ import shutil
 
 class ModelPusher:
 
-    def __init__(self, model_pusher_config: ModelPusherConfig,
-                 model_evaluation_artifact: ModelEvaluationArtifact
-                 ):
+    def __init__(self, model_pusher_config: ModelPusherConfig, model_evaluation_artifact: ModelEvaluationArtifact):
         try:
             logging.info(f"{'>>' * 30}Model Pusher log started.{'<<' * 30} ")
             self.model_pusher_config = model_pusher_config
@@ -23,6 +21,7 @@ class ModelPusher:
         try:
             evaluated_model_file_path = self.model_evaluation_artifact.evaluated_model_path
             export_dir = self.model_pusher_config.export_dir_path
+            
             model_file_name = os.path.basename(evaluated_model_file_path)
             export_model_file_path = os.path.join(export_dir, model_file_name)
             

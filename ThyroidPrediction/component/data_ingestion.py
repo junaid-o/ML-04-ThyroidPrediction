@@ -150,15 +150,17 @@ class DataIngestion:
 
             dataset_base = self.base_dataset_path
             raw_data_dir = self.base_data_ingestion_config.raw_data_dir
-            print('=='*20)
-            print(raw_data_dir)
-            print('=='*20)
+            #print('=='*20)
+            #print(raw_data_dir)
+            #print('=='*20)
+            
             raw_data_dir_path = os.path.join(dataset_base, raw_data_dir)
-            print('=='*20)
-            print(raw_data_dir_path)
+            
+            print('=== raw_data_dir_path =='*20)
+            print("\n\n",raw_data_dir_path)
             print('=='*20)            
             
-            os.makedirs(raw_data_dir, exist_ok=True)
+            #os.makedirs(raw_data_dir, exist_ok=True)
 
 
 
@@ -234,7 +236,10 @@ class DataIngestion:
             #processed_dataset_dir = os.path.join(self.base_dataset_path,"Processed_Dataset","Cleaned_Data")
             #os.makedirs(processed_dataset_dir, exist_ok=True)
 
-            processed_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,"Cleaned_Data")
+            
+            logging.info(f"Exporting Combined and Cleaned Data to path: [{os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir)}]")
+
+            processed_data_dir = os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir)
             os.makedirs(processed_data_dir, exist_ok=True)
             
             #processed_data_file_path = os.path.join(processed_dataset_dir,"df_combined_cleaned.csv")
@@ -243,6 +248,9 @@ class DataIngestion:
             processed_data_file_path = os.path.join(processed_data_dir,"df_combined_cleaned.csv")
             df_combined.to_csv(processed_data_file_path,index=False)
 
+            logging.info("Cleaned Data Export Done!")
+
+            print("Cleaned File Exported to:", processed_data_file_path)
             ########################################    MISSING vALUE IMPUATION    ##########################################################
 
             #df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
@@ -385,7 +393,7 @@ class DataIngestion:
 
             ##return df_combined.head()
 
-            return df_combined.head(10).to_html()
+            #return df_combined.head(10).to_html()
         
         except Exception as e:
             raise ThyroidException(e, sys)

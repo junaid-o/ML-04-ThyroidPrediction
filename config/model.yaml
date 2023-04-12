@@ -5,16 +5,6 @@ grid_search:
     cv: 2
     verbose: 3
 model_selection:
-  module_0:
-    class: LinearRegression
-    module: sklearn.linear_model
-    params:
-      fit_intercept: true
-    search_param_grid:
-      fit_intercept:
-      - true
-      - false
-
   module_1:
     class: RandomForestRegressor
     module: sklearn.ensemble

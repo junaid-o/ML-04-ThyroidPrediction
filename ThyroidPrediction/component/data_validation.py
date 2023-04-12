@@ -182,24 +182,26 @@ import json
 
 class DataValidation:
 
-    def __init__(self, data_validation_config:DataValidationConfig,data_ingestion_artifact: DataIngestionArtifact):
+    def __init__(self, data_validation_config:DataValidationConfig, data_ingestion_artifact: DataIngestionArtifact):
         try:
             
             self.data_validation_config = data_validation_config
             self.data_ingestion_artifact = data_ingestion_artifact
             
-            self.training_file_path = "ThyroidPrediction\\dataset_base\\Processed_Dataset\\Resampled_Dataset\\train_resampled\\train_resample_major.csv"
-            self.testing_file_path = "ThyroidPrediction\\dataset_base\\Processed_Dataset\\Resampled_Dataset\\test_resampled\\test_non_resample_major.csv"
-            self.report_file_path = "ThyroidPrediction\\artifact\\data_ingestion\\report\\report.json"
-            self.report_page_path = "ThyroidPrediction\\artifact\\data_ingestion\\report\\report.html"
+            #self.training_file_path = "ThyroidPrediction\\dataset_base\\Processed_Dataset\\Resampled_Dataset\\train_resampled\\train_resample_major.csv"
+            #self.testing_file_path = "ThyroidPrediction\\dataset_base\\Processed_Dataset\\Resampled_Dataset\\test_resampled\\test_non_resample_major.csv"
+            #self.report_file_path = "ThyroidPrediction\\artifact\\data_ingestion\\report\\report.json"
+            #self.report_page_path = "ThyroidPrediction\\artifact\\data_ingestion\\report\\report.html"
         except Exception as e:
             raise ThyroidException(e,sys) from e
         
 
     def get_train_and_test_df(self):
         try:            
-            #print("==file path=="*10)
             
+            training_file_path = self.data_ingestion_artifact.train_file_path
+            testing_file_path = self.data_ingestion_artifact.test_file_path
+
             train_df = pd.read_csv(self.training_file_path)
             test_df = pd.read_csv(self.testing_file_path)
 
@@ -215,8 +217,11 @@ class DataValidation:
             is_train_file_exists = False
             is_test_file_exists = False
 
-            train_file_path = self.training_file_path
-            test_file_path = self.testing_file_path
+            train_file_path = self.data_ingestion_artifact.train_file_path
+            test_file_path = self.data_ingestion_artifact.test_file_path
+
+            #train_file_path = self.training_file_path
+            #test_file_path = self.testing_file_path
 
             is_train_file_exists = os.path.exists(train_file_path)
             is_test_file_exists = os.path.exists(test_file_path)
@@ -226,8 +231,11 @@ class DataValidation:
             logging.info(f"Is train adn test file exists? --> {is_available}")
 
             if not is_available:
-                training_file = self.training_file_path
-                testing_file = self.testing_file_path
+                #training_file = self.training_file_path
+                #testing_file = self.testing_file_path
+
+                training_file = self.data_ingestion_artifact.train_file_path
+                testing_file = self.data_ingestion_artifact.test_file_path                
 
                 message = f"Training file [{training_file}] or Testing file [{testing_file}] is not present"
                 
@@ -268,14 +276,20 @@ class DataValidation:
             report.run(reference_data=train_df, current_data=test_df)
 
             ########### SAVING JSON FILE ########
-            report_file_path = self.report_file_path
+            report_file_path = self.data_validation_config.report_file_path
+            
+            #report_file_path = self.report_file_path
+            
             report_dir = os.path.dirname(report_file_path)
             os.makedirs(report_dir, exist_ok=True)            
             
             report.save_json(filename= report_file_path,)
 
             ############## SAVING HTML FILE #########
-            report_page_file_path = self.report_page_path
+            report_page_file_path = self.data_validation_config.report_page_file_path
+            
+            #report_page_file_path = self.report_page_path
+            
             report_page_dir = os.path.dirname(report_page_file_path)
             os.makedirs(report_page_dir, exist_ok=True)            
             
@@ -332,6 +346,10 @@ class DataValidation:
                                                               message= "Data Validation Performed Sucessfully")
             
             logging.info(f"Data validation artifact: {data_validation_artifact}")
+
+            print("====="*40)
+            print(data_validation_artifact)
+            print('===='*40)
 
             return data_validation_artifact
         except Exception as e:

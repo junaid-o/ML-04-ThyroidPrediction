@@ -1,5 +1,5 @@
 training_pipeline_config:
-  pipeline_name: thyroid
+  pipeline_name: ThyroidPrediction
   artifact_dir: artifact
 
 data_ingestion_config:
@@ -11,9 +11,11 @@ data_ingestion_config:
   ingested_test_dir: test 
 
 base_data_ingestion_config:
-  raw_data_dir: dataset_base/Raw_Dataset
+  raw_data_dir: raw_data
   processed_data_dir: processed_data
   cleaned_data_dir: cleaned_data
+
+base_data_transformation_config:
   resampled_data_dir: resampled_data
   train_resampled_dir: train_resampled
   test_non_resampled_dir: test_non_resampled

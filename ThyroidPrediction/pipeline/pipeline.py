@@ -40,7 +40,7 @@ class Pipeline(Thread):
         try:
             os.makedirs(config.training_pipeline_config.artifact_dir, exist_ok=True)
             
-            Pipeline.experiment_file_path=os.path.join(config.training_pipeline_config.artifact_dir,EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME)
+            Pipeline.experiment_file_path=os.path.join(config.training_pipeline_config.artifact_dir, EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME)
 
             super().__init__(daemon=False, name="pipeline")            
 
@@ -53,14 +53,15 @@ class Pipeline(Thread):
     def start_data_ingestion(self) -> DataIngestionArtifact:
 
         try:
-            data_ingestion = DataIngestion(data_ingestion_config= self.config.get_data_ingestion_config())
+            #data_ingestion = DataIngestion(data_ingestion_config= self.config.get_data_ingestion_config())
+            data_ingestion = DataIngestion(data_ingestion_config= self.config.get_base_data_ingestion_config())
             
             return data_ingestion.initiate_data_ingestion()
 
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-
+        
     def start_data_validation(self, data_ingestion_artifact:DataIngestionArtifact) -> DataValidationArtifact:
         try:
             data_validation = DataValidation(data_validation_config= self.config.get_data_validation_config(),
