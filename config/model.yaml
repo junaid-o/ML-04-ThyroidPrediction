@@ -6,13 +6,12 @@ grid_search:
     verbose: 3
 model_selection:
   module_1:
-    class: RandomForestRegressor
+    class: RandomForestClassifier
     module: sklearn.ensemble
     params:
       min_samples_leaf: 3
     search_param_grid:
       min_samples_leaf:
-      - 4
       - 6
       - 10
     n_estimators:

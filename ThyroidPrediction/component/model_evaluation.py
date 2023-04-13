@@ -7,23 +7,22 @@ import numpy as np
 import os
 import sys
 from ThyroidPrediction.util.util import write_yaml_file, read_yaml_file, load_object,load_data
-from ThyroidPrediction.entity.model_factory import evaluate_regression_model
+from ThyroidPrediction.entity.model_factory import evaluate_regression_model,evaluate_classification_model
 
 
 
 
 class ModelEvaluation:
 
-    def __init__(self, model_evaluation_config: ModelEvaluationConfig,
-                 data_ingestion_artifact: DataIngestionArtifact,
-                 data_validation_artifact: DataValidationArtifact,
-                 model_trainer_artifact: ModelTrainerArtifact):
+    def __init__(self, model_evaluation_config: ModelEvaluationConfig, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ModelTrainerArtifact):
         try:
             logging.info(f"{'>>' * 30}Model Evaluation log started.{'<<' * 30} ")
+    
             self.model_evaluation_config = model_evaluation_config
             self.model_trainer_artifact = model_trainer_artifact
             self.data_ingestion_artifact = data_ingestion_artifact
             self.data_validation_artifact = data_validation_artifact
+    
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
@@ -32,10 +31,16 @@ class ModelEvaluation:
             model = None
             model_evaluation_file_path = self.model_evaluation_config.model_evaluation_file_path
 
+            print("========== model evaluation v1: model evaluation file path =============")
+            print(model_evaluation_file_path)
+            print("============================================================="*2)
+
             if not os.path.exists(model_evaluation_file_path):
-                write_yaml_file(file_path=model_evaluation_file_path,
-                                )
+                
+                write_yaml_file(file_path=model_evaluation_file_path)
+
                 return model
+            
             model_eval_file_content = read_yaml_file(file_path=model_evaluation_file_path)
 
             model_eval_file_content = dict() if model_eval_file_content is None else model_eval_file_content
@@ -51,6 +56,11 @@ class ModelEvaluation:
     def update_evaluation_report(self, model_evaluation_artifact: ModelEvaluationArtifact):
         try:
             eval_file_path = self.model_evaluation_config.model_evaluation_file_path
+
+            print("========== model evaluation v2: eval file path =============")
+            print(eval_file_path)
+            print("============================================================="*2)
+
             model_eval_content = read_yaml_file(file_path=eval_file_path)
             model_eval_content = dict() if model_eval_content is None else model_eval_content
             
@@ -84,10 +94,23 @@ class ModelEvaluation:
     def initiate_model_evaluation(self) -> ModelEvaluationArtifact:
         try:
             trained_model_file_path = self.model_trainer_artifact.trained_model_file_path
+
+
+            print("========== model evaluation v3: trained model file path =============")
+            print(trained_model_file_path)
+            print("============================================================="*2)
+
+
             trained_model_object = load_object(file_path=trained_model_file_path)
 
             train_file_path = self.data_ingestion_artifact.train_file_path
             test_file_path = self.data_ingestion_artifact.test_file_path
+
+
+            print("========== model evaluation v4: train file path =============")
+            print(train_file_path)
+            print("============================================================="*2)
+
 
             schema_file_path = self.data_validation_artifact.schema_file_path
 
