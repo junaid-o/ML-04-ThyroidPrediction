@@ -141,7 +141,7 @@ from cgi import test
 
 class DataTransformation:
 
-    def __init__(self, data_transformation_config: BaseDataTransformationConfig, data_ingestion_artifact: BaseDataIngestionArtifact, base_data_ingestion: BaseDataIngestionConfig):
+    def __init__(self, data_transformation_config: BaseDataTransformationConfig, data_ingestion_artifact: DataIngestionArtifact, base_data_ingestion: BaseDataIngestionConfig):
     
         try:
             logging.info(f"{'>>' * 30} Data Transformation log started {'<<' * 30} ")
@@ -159,158 +159,29 @@ class DataTransformation:
             raise ThyroidException(e,sys) from e
 
 
-    def get_data_transformer_object(self):
-
-        try:
-            
-            processesd_data_dir_path = self.processed_data_dir_path
-            cleaned_data_file_path = os.path.join(self.cleaned_data_dir,"df_combined_cleaned.csv")
-            
-            print("===== Cleand Data File Path ======"*20)
-            print("\n\n",cleaned_data_file_path)
-            
-            df_combined = pd.read_csv(cleaned_data_file_path)
-
-            #######################################    MISSING VALUE IMPUATION    ##########################################################
-
-            df_combined['sex'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["sex"]].values)
-            df_combined['age'] = SimpleImputer(missing_values=np.nan, strategy="most_frequent").fit_transform(df_combined[["age"]].values)
-
-            df_combined['TSH'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TSH"]].values)
-            df_combined['T3'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T3"]].values)
-            df_combined['TT4'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["TT4"]].values)
-            df_combined['T4U'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["T4U"]].values)
-            df_combined['FTI'] = SimpleImputer(missing_values=np.nan, strategy="median").fit_transform(df_combined[["FTI"]].values)
-
-
-            ###################### HANDLINNG CATEGOICAL VARIABLES ###########################
-
-            df_combined_plot = df_combined.copy()
-            
-            columns_list = df_combined.columns.to_list()
-            
-            for feature in columns_list:
-                if len(df_combined[feature].unique()) <= 3:
-
-                    #print(df_combined[feature].unique() )
-                    value1 = df_combined[feature].unique()[0]
-                    value2 = df_combined[feature].unique()[1]
-                    df_combined[feature] = df_combined[feature].map({f'{value1}':0,f'{value2}':1})
-                    print(feature, df_combined[feature].unique())
-
-            df_combined = pd.get_dummies(data  = df_combined, columns=['referral_source'], drop_first=True)
-            df_combined["Class_encoded"] = LabelEncoder().fit_transform(df_combined["Class"])
-
-
-            return df_combined, df_combined_plot
-        except Exception as e:
-            raise ThyroidException(e,sys) from e
-        
-
-    def outliers_handling(self):
-        try:
-
-            ############################## OUTLIERS HANDLING ###############################
-
-            df_combined, df_combined_plot = self.get_data_transformer_object()
-            
-            def outliers_fence(col):
-                Q1 = df_combined[col].quantile(q=0.25)
-                Q3 = df_combined[col].quantile(q=0.75)
-                IQR = Q3 - Q1
-
-                lower_fence = Q1 - 1.5*IQR
-                upper_fence = Q3 + 1.5*IQR
-                return lower_fence, upper_fence
-
-            lower_fence1, upper_fence1 = outliers_fence(col='TSH')
-            lower_fence2, upper_fence2 = outliers_fence(col='T3')
-            lower_fence3, upper_fence3 = outliers_fence(col='TT4')
-            lower_fence4, upper_fence4 = outliers_fence(col='T4U')
-            lower_fence5, upper_fence5 = outliers_fence(col='FTI')
-
-            # Winsorize the data just replace outliers with corresponding fence
-
-            df_combined['TSH'] = np.where(df_combined["TSH"] < lower_fence1, lower_fence1, df_combined["TSH"])
-            df_combined["TSH"] = np.where(df_combined["TSH"] > upper_fence1, upper_fence1, df_combined["TSH"])
-
-            df_combined['T3'] = np.where(df_combined["T3"] < lower_fence2, lower_fence2, df_combined["T3"])
-            df_combined["T3"] = np.where(df_combined["T3"] > upper_fence2, upper_fence2, df_combined["T3"])
-
-            df_combined['TT4'] = np.where(df_combined["TT4"] < lower_fence3, lower_fence3, df_combined["TT4"])
-            df_combined["TT4"] = np.where(df_combined["TT4"] > upper_fence3, upper_fence3, df_combined["TT4"])
-
-            df_combined['T4U'] = np.where(df_combined["T4U"] < lower_fence4, lower_fence4, df_combined["T4U"])
-            df_combined["T4U"] = np.where(df_combined["T4U"] > upper_fence4, upper_fence4, df_combined["T4U"])
-
-            df_combined['FTI'] = np.where(df_combined["FTI"] < lower_fence5, lower_fence5, df_combined["FTI"])
-            df_combined["FTI"] = np.where(df_combined["FTI"] > upper_fence5, upper_fence5, df_combined["FTI"])
-        
-            return df_combined, df_combined_plot
-                
-        except Exception as e:
-            raise ThyroidException(e,sys) from e   
-
-    def get_target_by_major_class(self):
-        try:
-
-            ##################################### MAJOR CLASS CREATION   ############################################################
-            
-            df_combined_class_labels, df_combined_plot = self.outliers_handling()
-            df_combined_class_labels["Class_label"] = df_combined_plot['Class']
-
-            df = df_combined_class_labels
-            # Define the major class conditions
-            conditions = [
-                df['Class_label'].isin(['compensated hypothyroid', 'primary hypothyroid', 'secondary hypothyroid']),
-                df['Class_label'].isin(['hyperthyroid', 'T toxic', 'secondary toxic']),
-                df['Class_label'].isin(['replacement therapy', 'underreplacement', 'overreplacement']),
-                df['Class_label'].isin(['goitre']),
-                df['Class_label'].isin(['increased binding protein', 'decreased binding protein']),
-                df['Class_label'].isin(['sick']),
-                df['Class_label'].isin(['discordant'])
-            ]
-
-            # Define the major class labels
-            class_labels = [
-                'hypothyroid',
-                'hyperthyroid',
-                'replacement therapy',
-                'goitre',
-                'binding protein',
-                'sick',
-                'discordant'
-            ]
-
-            # Add the major class column to the dataframe based on the conditions
-            df['major_class'] = np.select(conditions, class_labels, default='negative')
-            df.drop("Class_label", axis=1, inplace=True)
-            
-            df_combined_grouped = df.copy()
-            
-            df_combined_grouped["major_class_encoded"] = LabelEncoder().fit_transform(df_combined_grouped["major_class"])
-            transformed_data_dir = os.path.join(self.data_transformation_config.transformed_data_dir)
-            #transformed_data_dir = os.path.join(self.processed_data_dir_path,"Transformed_Data")
-            os.makedirs(transformed_data_dir, exist_ok=True)
-
-            transformed_data_file_path = os.path.join(transformed_data_dir,"df_transformed_major_class.csv")
-            df_combined_grouped.to_csv(transformed_data_file_path, index=False)
-
-            return df_combined_grouped
-        
-        except Exception as e:
-            raise ThyroidException(e,sys) from e
-
-
     def get_resampled_data(self):
         try:
-            df_combined_grouped = self.get_target_by_major_class()
+            logging.info("Importing Train and Test files for Resampling of Data")
+
+            train_file_path = self.data_ingestion_artifact.train_file_path
+            test_file_path = self.data_ingestion_artifact.test_file_path
+
+            train = pd.read_csv(train_file_path)
+            test = pd.read_csv(test_file_path)
+
+            print("========= DataTransformation V1: train.columns =========")
+            print(train.columns)
+            print("================"*5)
+            
 
             #################################   RESAMPLING  #################################################
-            X = df_combined_grouped.drop(["Class","Class_encoded",'major_class','major_class_encoded'], axis=1)
-            y = df_combined_grouped["major_class_encoded"]
+            #X = df_combined_grouped.drop(["Class","Class_encoded",'major_class','major_class_encoded'], axis=1)
+            #y = df_combined_grouped["major_class_encoded"]
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
+            #X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, shuffle=True, stratify= y, random_state=2023 )
+
+            X_train = train.drop(['major_class_encoded'], axis=1)
+            y_train = train["major_class_encoded"]
 
             ###############################################################
             # 
@@ -324,9 +195,9 @@ class DataTransformation:
                                     'thyroid_surgery','I131_treatment','query_hypothyroid','query_hyperthyroid','lithium',
                                     'goitre','tumor','hypopituitary','psych']
 
-            continuous_features = df_combined_grouped.drop(categorical_features, axis=1)
+            continuous_features = train.drop(categorical_features, axis=1)
 
-            categorical_features_indices = [df_combined_grouped.columns.get_loc(col) for col in categorical_features]
+            categorical_features_indices = [train.columns.get_loc(col) for col in categorical_features]
 
                      
             # Create an instance of RandomOverSampler
@@ -336,7 +207,7 @@ class DataTransformation:
 
             X_resampled_random, y_resampled_random = random_over_sampler.fit_resample(X_train, y_train)
 
-            X_resampled_random = pd.DataFrame(data = X_resampled_random, columns = X.columns)
+            X_resampled_random = pd.DataFrame(data = X_resampled_random, columns = X_train.columns)
             y_resampled_random = pd.DataFrame(y_resampled_random, columns= ["major_class_encoded"])
 
             df_resample_random = pd.concat([X_resampled_random,y_resampled_random], axis=1)
@@ -393,17 +264,31 @@ class DataTransformation:
             
             ##############################################################################################################
             ############################################################################################################
-            train_resample_dir = os.path.join(self.data_transformation_config.train_resampled_dir)
+
+            logging.info("Exporting Resampled Train data.....")
+
+            train_resample_dir = os.path.join(self.data_transformation_config.resampled_data_dir, "train")
+
+            print("========= DataTransformation V2: train_resample_dir =========")
+            print(train_resample_dir)
+            print("================"*5)
+
+
             os.makedirs(train_resample_dir, exist_ok=True)
             train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
             df_resample_random.to_csv(train_resample_file_path, index=False)
+            
+            logging.info(f"Resampled train file exportd: [ {train_file_path} ]")
 
 
-            test_non_resampled = pd.concat([X_test,y_test], axis=1)
-            test_resample_dir = os.path.join(self.data_transformation_config.test_non_resampled_dir)
+            test_non_resampled = test
+            test_resample_dir = os.path.join(self.data_transformation_config.resampled_data_dir , "test")
             os.makedirs(test_resample_dir, exist_ok=True)
+            
             test_non_resample_file_path = os.path.join(test_resample_dir, "test_non_resample_major.csv")
+            
             test_non_resampled.to_csv(test_non_resample_file_path, index=False)
+            logging.info(f"Non-Resampled test file copied to: [ {test_non_resample_file_path} ]")
 
             #############################################################################################################
             #train_resample_dir = os.path.join(self.processed_data_dir_path ,"Resampled_Dataset","train_resampled")
@@ -439,4 +324,4 @@ class DataTransformation:
     
 
     def __del__(self):
-        logging.info(f"{'>>'*30}Data Transformation log completed.{'<<'*30} \n\n")
+        logging.info(f"{'>>'*30} Data Transformation log completed {'<<'*30} \n\n")

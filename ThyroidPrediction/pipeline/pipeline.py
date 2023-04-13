@@ -88,7 +88,8 @@ class Pipeline(Thread):
         try:
             data_transformation = DataTransformation(data_transformation_config=self.config.get_base_data_transformation_config(),
                                                      data_ingestion_artifact=data_ingestion_artifact,
-                                                     data_validation_artifact=data_validation_artifact)
+                                                     base_data_ingestion= BaseDataIngestionConfig
+                                                     )
             
             return data_transformation.initiate_data_transformation()
         except Exception as e:
