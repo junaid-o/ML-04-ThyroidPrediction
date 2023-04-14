@@ -10,7 +10,7 @@ from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
 
 from ThyroidPrediction.config.configuration import Configuration
-from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, BaseDataTransformationArtifact, ModelEvaluationArtifact, ModelPusherArtifact, ModelTrainerArtifact
+from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, BaseDataTransformationArtifact, ModelEvaluationArtifact, ModelPusherArtifact, ModelTrainerArtifact,ClassModelTrainerArtifact
 from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseDataIngestionConfig
 from ThyroidPrediction.component.data_ingestion import DataIngestion
 from ThyroidPrediction.component.data_validation import DataValidation
@@ -96,7 +96,7 @@ class Pipeline(Thread):
             raise ThyroidException(e, sys)
 
     #def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
-    def start_model_trainer(self, data_transformation_artifact: BaseDataTransformationArtifact) -> ModelTrainerArtifact:
+    def start_model_trainer(self, data_transformation_artifact: BaseDataTransformationArtifact) -> ClassModelTrainerArtifact:
         try:
             model_trainer = ModelTrainer(model_trainer_config=self.config.get_model_trainer_config(),
                                          data_transformation_artifact = data_transformation_artifact)
@@ -105,7 +105,7 @@ class Pipeline(Thread):
             raise ThyroidException(e, sys) from e
 
 
-    def start_model_evaluation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ModelTrainerArtifact) -> ModelEvaluationArtifact:
+    def start_model_evaluation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ClassModelTrainerArtifact) -> ModelEvaluationArtifact:
         try:
             model_eval = ModelEvaluation(model_evaluation_config = self.config.get_model_evaluation_config(),
                                          data_ingestion_artifact = data_ingestion_artifact,
@@ -119,7 +119,7 @@ class Pipeline(Thread):
     def start_model_pusher(self, model_eval_artifact: ModelEvaluationArtifact) -> ModelPusherArtifact:
         try:
             model_pusher = ModelPusher(model_pusher_config=self.config.get_model_pusher_config(),
-                                       model_evaluation_artifact=model_eval_artifact)
+                                       model_evaluation_artifact= model_eval_artifact)
             
             return model_pusher.initiate_model_pusher()
         except Exception as e:

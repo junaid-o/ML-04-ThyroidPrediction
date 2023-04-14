@@ -4,7 +4,7 @@ from ThyroidPrediction.exception import ThyroidException
 import sys
 from ThyroidPrediction.logger import logging
 from typing import List
-from ThyroidPrediction.entity.artifact_entity import BaseDataTransformationArtifact, DataTransformationArtifact, ModelTrainerArtifact
+from ThyroidPrediction.entity.artifact_entity import BaseDataTransformationArtifact, ClassModelTrainerArtifact, DataTransformationArtifact #, ModelTrainerArtifact
 from ThyroidPrediction.entity.config_entity import ModelTrainerConfig
 from ThyroidPrediction.util.util import load_numpy_array_data,save_object,load_object
 from ThyroidPrediction.entity.model_factory import MetricInfoArtifact, ModelFactory,GridSearchedBestModel
@@ -145,7 +145,7 @@ class ModelTrainer:
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-    def initiate_model_trainer(self)->ModelTrainerArtifact:
+    def initiate_model_trainer(self)->ClassModelTrainerArtifact:
         try:
             logging.info(f"Loading transformed training dataset")
             transformed_train_file_path = self.data_transformation_artifact.transformed_resampled_train_file_path
@@ -241,14 +241,32 @@ class ModelTrainer:
 
             save_object(file_path=trained_model_file_path, obj=housing_model)
 
+            
+            #model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",
+            #                                              trained_model_file_path=trained_model_file_path,
+            #                                              train_rmse=metric_info.train_rmse,
+            #                                              test_rmse=metric_info.test_rmse,
+            #                                              train_accuracy=metric_info.train_accuracy,
+            #                                              test_accuracy=metric_info.test_accuracy,
+            #                                              model_accuracy=metric_info.model_accuracy)
 
-            model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",
-                                                          trained_model_file_path=trained_model_file_path,
-                                                          train_rmse=metric_info.train_rmse,
-                                                          test_rmse=metric_info.test_rmse,
-                                                          train_accuracy=metric_info.train_accuracy,
-                                                          test_accuracy=metric_info.test_accuracy,
-                                                          model_accuracy=metric_info.model_accuracy)
+
+            print('======== Model Trainer: ClassModel Trainer Artifact ======='*2)
+            
+            print("================================================================"*2)                        
+
+
+            model_trainer_artifact=  ClassModelTrainerArtifact(is_trained=True,
+                                                               message="Model Trained successfully",
+                                                               trained_model_file_path=trained_model_file_path,
+                                                               train_f1_weighted=metric_info.train_f1_weighted,
+                                                               test_f1_weighted=metric_info.test_f1_weighted,
+                                                               train_balanced_accuracy=metric_info.train_balanced_accuracy,
+                                                               test_balanced_accuracy=metric_info.test_balanced_accuracy,
+                                                               model_accuracy=metric_info.model_accuracy)            
+       
+            print(model_trainer_artifact)
+            print("================================================================"*2)                        
 
             logging.info(f"Model Trainer Artifact: {model_trainer_artifact}")
         

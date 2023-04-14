@@ -2,7 +2,7 @@ grid_search:
   class: GridSearchCV
   module: sklearn.model_selection
   params:
-    cv: 2
+    cv: 4
     verbose: 3
 model_selection:
   module_1:

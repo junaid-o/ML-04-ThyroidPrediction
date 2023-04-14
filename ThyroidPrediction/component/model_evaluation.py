@@ -1,20 +1,20 @@
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.entity.config_entity import ModelEvaluationConfig
-from ThyroidPrediction.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,ModelTrainerArtifact,ModelEvaluationArtifact
+from ThyroidPrediction.entity.artifact_entity import ClassModelTrainerArtifact, DataIngestionArtifact,DataValidationArtifact,ModelTrainerArtifact,ModelEvaluationArtifact
 from ThyroidPrediction.constant import *
 import numpy as np
 import os
 import sys
 from ThyroidPrediction.util.util import write_yaml_file, read_yaml_file, load_object,load_data
-from ThyroidPrediction.entity.model_factory import evaluate_regression_model,evaluate_classification_model
+from ThyroidPrediction.entity.model_factory import evaluate_classification_model #, evaluate_regression_model
 
 
 
 
 class ModelEvaluation:
 
-    def __init__(self, model_evaluation_config: ModelEvaluationConfig, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ModelTrainerArtifact):
+    def __init__(self, model_evaluation_config: ModelEvaluationConfig, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ClassModelTrainerArtifact):
         try:
             logging.info(f"{'>>' * 30}Model Evaluation log started.{'<<' * 30} ")
     
@@ -125,12 +125,24 @@ class ModelEvaluation:
 
             # target_column
             logging.info(f"Converting target column into numpy array.")
+
+            print("========= Model Evaluation ==========="*3)
+            print("Converting target column into numpy array.")
+            print("======================================"*3)
+
             train_target_arr = np.array(train_dataframe[target_column_name])
             test_target_arr = np.array(test_dataframe[target_column_name])
             logging.info(f"Conversion completed target column into numpy array.")
 
             # dropping target column from the dataframe
             logging.info(f"Dropping target column from the dataframe.")
+
+
+            print("========= Model Evaluation ==========="*3)
+            print("Dropping target column from the dataframe.")
+            print("======================================"*3)
+
+
             train_dataframe.drop(target_column_name, axis=1, inplace=True)
             test_dataframe.drop(target_column_name, axis=1, inplace=True)
             logging.info(f"Dropping target column from the dataframe completed.")
@@ -139,6 +151,12 @@ class ModelEvaluation:
 
             if model is None:
                 logging.info("Not found any existing model. Hence accepting trained model")
+
+                print("========= Model Evaluation ==========="*3)
+                print("Not found any existing model. Hence accepting trained model")
+                print("======================================"*3)
+
+
                 model_evaluation_artifact = ModelEvaluationArtifact(evaluated_model_path=trained_model_file_path,
                                                                     is_model_accepted=True)
                 self.update_evaluation_report(model_evaluation_artifact)
@@ -147,13 +165,22 @@ class ModelEvaluation:
 
             model_list = [model, trained_model_object]
 
-            metric_info_artifact = evaluate_regression_model(model_list=model_list,
-                                                               X_train=train_dataframe,
-                                                               y_train=train_target_arr,
-                                                               X_test=test_dataframe,
-                                                               y_test=test_target_arr,
-                                                               base_accuracy=self.model_trainer_artifact.model_accuracy,
-                                                               )
+            #metric_info_artifact = evaluate_regression_model(model_list=model_list,
+            #                                                   X_train=train_dataframe,
+            #                                                   y_train=train_target_arr,
+            #                                                   X_test=test_dataframe,
+            #                                                   y_test=test_target_arr,
+            #                                                   base_accuracy=self.model_trainer_artifact.model_accuracy,
+            #                                                   )
+
+            metric_info_artifact = evaluate_classification_model(model_list=model_list,
+                                                   X_train=train_dataframe,
+                                                   y_train=train_target_arr,
+                                                   X_test=test_dataframe,
+                                                   y_test=test_target_arr,
+                                                   base_accuracy=self.model_trainer_artifact.model_accuracy,
+                                                   )
+            
             logging.info(f"Model evaluation completed. model metric artifact: {metric_info_artifact}")
 
             if metric_info_artifact is None:
@@ -178,4 +205,4 @@ class ModelEvaluation:
             raise ThyroidException(e, sys) from e
 
     def __del__(self):
-        logging.info(f"{'=' * 20}Model Evaluation log completed.{'=' * 20} ")
+        logging.info(f"{'>' * 20} Model Evaluation log completed {'<' * 20} ")

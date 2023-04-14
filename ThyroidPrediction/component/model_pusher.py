@@ -10,7 +10,7 @@ class ModelPusher:
 
     def __init__(self, model_pusher_config: ModelPusherConfig, model_evaluation_artifact: ModelEvaluationArtifact):
         try:
-            logging.info(f"{'>>' * 30}Model Pusher log started.{'<<' * 30} ")
+            logging.info(f"{'>>' * 30} Model Pusher log started {'<<' * 30} ")
             self.model_pusher_config = model_pusher_config
             self.model_evaluation_artifact = model_evaluation_artifact
 
@@ -25,6 +25,11 @@ class ModelPusher:
             model_file_name = os.path.basename(evaluated_model_file_path)
             export_model_file_path = os.path.join(export_dir, model_file_name)
             
+            print("============= Model Pusher: ========="*5)
+            print(export_dir)
+            print("==================="*4)
+
+
             logging.info(f"Exporting model file: [{export_model_file_path}]")
             os.makedirs(export_dir, exist_ok=True)
 
@@ -50,4 +55,4 @@ class ModelPusher:
             raise ThyroidException(e, sys) from e
 
     def __del__(self):
-        logging.info(f"{'>>' * 20}Model Pusher log completed.{'<<' * 20} ")
+        logging.info(f"{'>>' * 20} Model Pusher log completed {'<<' * 20} ")
