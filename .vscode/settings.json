@@ -11,7 +11,7 @@
     "notebook.output.scrolling": true,
     "notebook.output.textLineLimit": 30,
     "editor.mouseWheelZoom": true,
-    "window.zoomLevel": -2,
+    "window.zoomLevel": -1,
     
 }
 
