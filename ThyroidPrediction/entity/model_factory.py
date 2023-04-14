@@ -90,7 +90,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             #logging all important metric
             logging.info(f"{'>>'*30} Score {'<<'*30}")
             logging.info(f"Train F1_weighted\t\t Test F1_weighted\t\t Train Balanced Accuracy Score\t\t Test Balanced Accuracy Score\t\t Average Score")
-            logging.info(f"{train_f1}\t\t {test_f1}\t\t {train_balanced_accuracy_score}\t\t {test_balanced_accuracy_score}\t\t{model_accuracy}")
+            logging.info(f"{train_f1}\t\t {test_f1}\t\t {train_balanced_accuracy_score}\t\t {test_balanced_accuracy_score}\t\t {model_accuracy}")
 
             logging.info(f"{'>>'*30} Loss {'<<'*30}")
             logging.info(f"Diff test train accuracy: [{diff_test_train_acc}].") 
@@ -99,9 +99,9 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
 
             #if model accuracy is greater than base accuracy and train and test score is within certain thershold
             #we will accept that model as accepted model
-            
+            logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
             if model_accuracy >= base_accuracy and diff_test_train_acc < 0.2:
-                base_accuracy = model_accuracy
+                #base_accuracy = model_accuracy
                 
                 logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
                 
