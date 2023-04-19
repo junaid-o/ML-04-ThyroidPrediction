@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="\ThyroidPrediction\artifact\base_data_ingestion\2023-04-18-23-11-00\cleaned_data\processed_data\Cleaned_transformed\df_transformed_major_class.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\ThyroidPrediction\artifact\base_data_ingestion\2023-04-18-23-11-00\cleaned_data\processed_data\split_data\train_set\train.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\ThyroidPrediction\artifact\transformed_data_dir\2023-04-18-23-11-00\resampled_data\train\train_resample_major.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

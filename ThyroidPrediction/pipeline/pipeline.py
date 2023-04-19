@@ -238,7 +238,7 @@ class Pipeline(Thread):
             raise ThyroidException(e, sys) from e
 
     @classmethod
-    def get_experiments_status(cls, limit: int = 5) -> pd.DataFrame:
+    def get_experiments_status(cls, limit: int = 10) -> pd.DataFrame:
 
         try:
             print("experiment path",os.path.exists(Pipeline.experiment_file_path))  
