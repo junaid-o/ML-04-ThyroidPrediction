@@ -1,3 +1,8 @@
+from email import message
+from ipaddress import collapse_addresses
+from re import S
+from numpy import dtype
+import pandas as pd
 from ThyroidPrediction.logger import get_log_dataframe
 from flask import Flask, request
 import sys
@@ -38,6 +43,9 @@ app = Flask(__name__)
 @app.route('/artifact', defaults={'req_path': 'ThyroidPrediction'})
 @app.route('/artifact/<path:req_path>')
 def render_artifact_dir(req_path):
+
+    logging.info(f"req_path: {req_path}")
+    
     os.makedirs(req_path, exist_ok=True)
     # Joining the base and the requested path
     print(f"req_path: {req_path}")
@@ -79,6 +87,8 @@ def index():
 
 @app.route('/view_experiment_hist', methods=['GET', 'POST'])
 def view_experiment_history():
+    logging.info(f"req_path: view_experiment_hist")
+
     experiment_df = Pipeline.get_experiments_status()
     context = {
         "experiment": experiment_df.to_html(classes='table table-striped col-12')
@@ -88,9 +98,12 @@ def view_experiment_history():
 
 @app.route('/train', methods=['GET', 'POST'])
 def train():
+    
+    logging.info(f"req_path: train")
+
     message = ""
-    pipeline = Pipeline(config=Configuration(
-        time_stamp=get_current_time_stamp()))
+    pipeline = Pipeline(config=Configuration(time_stamp=get_current_time_stamp()))
+
     if not Pipeline.experiment.running_status:
         message = """
                     Training Started....                     
@@ -109,6 +122,9 @@ def train():
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
+    logging.info(f"req_path: predict")
+
+    message = ""
     context = {
         THYROID_DATA_KEY: None,
         THYROID_PREDICTION_VALUE_KEY: None
@@ -136,10 +152,40 @@ def predict():
         T4U = float(request.form["t4u"])
         FTI = float(request.form["fti"])
         psych = float(request.form["psych"])
-        referral_source_SVHC = float(request.form["referral_source_SVHC"])
-        referral_source_SVHD = float(request.form["referral_source_SVHD"])
-        referral_source_SVI = float(request.form["referral_source_SVI"])
-        referral_source_other = float(request.form["referral_source_other"])
+
+        #referral_source_SVHC = float(request.form["referral_source_SVHC"])
+        #referral_source_SVHD = float(request.form["referral_source_SVHD"])
+        #referral_source_SVI = float(request.form["referral_source_SVI"])
+        #referral_source_other = float(request.form["referral_source_other"])
+
+        referral_source = float(request.form["referral_source"])
+
+        if referral_source==0:
+            referral_source_SVHC = 1
+            referral_source_SVHD = 0
+            referral_source_SVI = 0
+            referral_source_other = 0
+
+        elif referral_source==1:
+            referral_source_SVHC = 0
+            referral_source_SVHD = 1
+            referral_source_SVI = 0
+            referral_source_other = 0
+
+        elif referral_source==2:
+            referral_source_SVHC = 0
+            referral_source_SVHD = 0
+            referral_source_SVI = 1
+            referral_source_other = 0
+
+        elif referral_source==3:
+            referral_source_SVHC = 0
+            referral_source_SVHD = 0
+            referral_source_SVI = 0
+            referral_source_other = 1
+            
+
+            
 
         thyroid_data = ThyroidData(age=age,
                                    TSH= TSH,
@@ -179,6 +225,56 @@ def predict():
         
         return render_template('predict.html', context=context)
     return render_template("predict.html", context=context)
+
+
+@app.route('/predict_bulk', methods=['POST'])
+def predict_bulk():
+    logging.info(f"req_path: predict_bulk")
+    
+    try:
+        if request.method == 'POST':
+            file = request.files['file']
+            thyroid_df = pd.read_csv(file)
+            try:
+                thyroid_df = thyroid_df.drop("major_class_encoded", axis=1)
+                #print(thyroid_df.columns)
+                #print(thyroid_df.dtypes )
+            except:
+                pass
+                
+            thyroid_predictor = ThyroidPredictor(model_dir=MODEL_DIR)
+            try:
+                thyroid_prediction = thyroid_predictor.bulk_prediction(X=thyroid_df)
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+            major_class_mapping = {0: 'Binding Protein',
+                                   1: 'Discordant',
+                                   2: 'Goitre',
+                                   3: 'Hyperthyroid',
+                                   4: 'Hypothyroid',
+                                   5: 'Negative',
+                                   6: 'Replacement Therapy',
+                                   7: 'Sick'}
+            
+            thyroid_df["Predictions"] = thyroid_prediction
+            thyroid_df["Predictions"] = thyroid_df["Predictions"].map(major_class_mapping)  # Major class mapping and replacing numerical rpresentation of major classes with string values
+            
+            result = thyroid_df.to_html(show_dimensions=True,
+                                         justify= "center",
+                                         classes=['table', 'table-striped'],
+                                         border=0.5,
+                                         escape=True)
+
+            message = "PREDICTION RESULT"
+            
+            return render_template("bulk_prediction.html", result=result, message= message)
+        
+        message = 'Something Is Wrong!'
+        return render_template("bulk_prediction.html", result="", message= message)
+    
+    except Exception as e:
+        raise ThyroidException(e, sys) from e
 
 
 @app.route('/saved_models', defaults={'req_path': 'saved_models'})

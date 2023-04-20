@@ -171,3 +171,32 @@ class ThyroidPredictor:
 
         except Exception as e:
             raise ThyroidException(e, sys) from e
+        
+    def bulk_prediction(self, X):
+        try:
+            logging.info(f"ThyroidPredictor is Making Predictions")
+
+            model_path = self.get_latest_model_path()
+            model = load_object(file_path=model_path)
+            
+            logging.info(f"Model objct loaded from path: [ {model_path} ]")
+
+           
+
+            major_class_mapping = {0: 'Binding Protein',
+                                   1: 'Discordant',
+                                   2: 'Goitre',
+                                   3: 'Hyperthyroid',
+                                   4: 'Hypothyroid',
+                                   5: 'Negative',
+                                   6: 'Replacement Therapy',
+                                   7: 'Sick'}
+            
+            major_class_prediction = model.predict(X)
+            
+            logging.info(f"Predictions: [ {major_class_prediction} ]")
+            # returning original prdictions without mapping but it will be don in app.py file
+            return major_class_prediction
+
+        except Exception as e:
+            raise ThyroidException(e, sys) from e        
