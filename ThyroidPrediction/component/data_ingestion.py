@@ -1,3 +1,8 @@
+import shutil
+from sqlite3 import Timestamp
+
+
+from ThyroidPrediction.constant import get_current_time_stamp
 from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseDataIngestionConfig
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.logger import logging
@@ -16,6 +21,15 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from imblearn.over_sampling import SMOTENC,RandomOverSampler,KMeansSMOTE
+import seaborn as sns
+import matplotlib.pyplot as plt
+import plotly.graph_objs as go
+import plotly.subplots as sp
+import plotly.express as px
+import plotly.io as pio
+import pandas as pd
+import os
+import natsort
 
 
 #class DataIngestion:
@@ -145,13 +159,17 @@ from imblearn.over_sampling import SMOTENC,RandomOverSampler,KMeansSMOTE
 class DataIngestion:
 
     def __init__(self, data_ingestion_config:BaseDataIngestionConfig):
+
         try:
             logging.info(f"{'='*20} DATA INGESTION LOG STARTED.{'='*20}")
             
             #self.data_ingestion_config = data_ingestion_config
             self.base_data_ingestion_config = data_ingestion_config
             self.base_dataset_path = r"ThyroidPrediction\dataset_base"
-    
+
+            self.profiling_dir = os.path.join("ThyroidPrediction\\artifact", "Profiling", get_current_time_stamp())
+            os.makedirs(self.profiling_dir, exist_ok=True)
+
         except Exception as e:
             raise ThyroidException(e, sys) from e
         
@@ -232,7 +250,7 @@ class DataIngestion:
 
 
 
-            print("Missing Value('?') Count After Replaing Thm ith NaN Revealing:\n")
+            print("Missing Value('?') Count After Replaing '?' symbols with NaN Revealing:\n")
             for column in df_combined.columns:
                 missing_count = df_combined[column][df_combined[column] == "?"].count()
                 
@@ -472,7 +490,7 @@ class DataIngestion:
 
     def outliers_handling(self):
         try:
-
+            
             ############################## OUTLIERS HANDLING ###############################
 
             df_combined, df_combined_plot = self.get_data_transformer_object()
@@ -575,6 +593,320 @@ class DataIngestion:
         except Exception as e:
             raise ThyroidException(e,sys) from e
 
+    def profiling(self):
+        def get_missing_value_fig():
+            try:
+
+                df_combined = self.get_base_data()
+
+                plt.figure(figsize=(14, 6), layout="tight")
+
+                # plt.subplot(1,2,1)
+                # sns.heatmap(df_combined_orig.isnull(), cbar=False, cmap="viridis", yticklabels=False)
+                # plt.title('Missing Values Before', fontdict={'fontsize':20},pad=12)
+
+                # plt.subplot(1,2,2)
+                sns.heatmap(df_combined.isnull(), cbar=False, cmap="viridis", yticklabels=False)
+                plt.title("Revealed Missing Values", fontdict={'fontsize': 20}, pad=12)
+                #plt.show()
+
+                missing_value_fig_path = os.path.join(self.profiling_dir, "1_missing_values.png")
+                plt.savefig(missing_value_fig_path, dpi=300, bbox_inches='tight')
+
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+        def get_outlier_before_fig():
+            try:
+                df_combined_orig = self.get_base_data()
+                df_combined_orig[df_combined_orig["TSH"] != "?"][["TSH"]].astype(float)
+
+                # Define the number of rows and columns for the subplot grid
+                num_rows = 2
+                num_cols = 3
+
+                # Create a subplot grid with the specified number of rows and columns
+                fig = sp.make_subplots(rows=num_rows, cols=num_cols,subplot_titles=['age', 'TSH', 'T3', 'TT4', 'T4U', 'FTI'])
+
+                # Loop through each column in the dataframe and add a box plot to the subplot grid
+                for idx, col_name in enumerate(['age', 'TSH', 'T3', 'TT4', 'T4U', 'FTI']):
+                    row_num = (idx // num_cols) + 1
+                    col_num = (idx % num_cols) + 1
+                    
+                    fig.add_trace(px.box(df_combined_orig[df_combined_orig[col_name] != "?"][[col_name]].astype(float)).data[0], row=row_num, col=col_num,)
+
+                    # Set the title of the subplot grid
+                    fig.update_layout(height=500,width=1100, title='Before Handling Outliers',
+                                    paper_bgcolor = "rgba(0,0,0,0)",
+                                    plot_bgcolor = "rgba(0,0,0,0)",                  
+                                    )
+                    fig.update_traces(marker_color='green')
+                # Show the plot
+
+                ###############################
+                fig.update_yaxes(showline=False,showgrid=False)
+                fig.update_xaxes(showline=False,showgrid=False)
+                #fig.show()
+                ##########################################
+                outlier_fig_before_path = os.path.join(self.profiling_dir, "2_outliers_before.html")
+                pio.write_html(fig,file = outlier_fig_before_path, auto_play=False)                
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+            
+        def get_outlier_after_outlier_handling():
+            try:
+                df_combined, _ = self.outliers_handling()
+                # Define the number of rows and columns for the subplot grid
+                num_rows = 2
+                num_cols = 3
+
+                # Create a subplot grid with the specified number of rows and columns
+                fig = sp.make_subplots(rows=num_rows, cols=num_cols,subplot_titles=['age', 'TSH', 'T3', 'TT4', 'T4U', 'FTI'])
+
+                # Loop through each column in the dataframe and add a box plot to the subplot grid
+                for idx, col_name in enumerate(['age', 'TSH', 'T3', 'TT4', 'T4U', 'FTI']):
+                    row_num = (idx // num_cols) + 1
+                    col_num = (idx % num_cols) + 1
+                    fig.add_trace(px.box(df_combined[col_name]).data[0], row=row_num, col=col_num,)
+
+                    # Set the title of the subplot grid
+                    fig.update_layout(height=500,width=1100, title='After Handling Outliers',
+                                    paper_bgcolor = "rgba(0,0,0,0)",
+                                    plot_bgcolor = "rgba(0,0,0,0)",                  
+                                    )
+                    fig.update_traces(marker_color='green')
+                # Show the plot
+
+                ###############################
+                fig.update_yaxes(showline=False,showgrid=False)
+                fig.update_xaxes(showline=False,showgrid=False)
+                #fig.show()
+                ##########################################
+                outliers_fig_after_path = os.path.join(self.profiling_dir,"3_outliers_after.html")
+                pio.write_html(fig,file = outliers_fig_after_path, auto_play=False)
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+            
+        def get_class_pecentage_share():
+            try:
+                df_combined, _ = self.outliers_handling()
+                fig = px.pie(df_combined,names='Class', hole=0.3)
+
+                fig.update_layout(title="Percentage Share of Class Labels",
+                                height=800,
+                                width = 800,
+                                paper_bgcolor = "rgba(0,0,0,0)",
+                                plot_bgcolor = "rgba(0,0,0,0)",
+
+                        #annotations = [dict(text="Class".title(), showarrow=False)],
+                        margin_autoexpand=True,
+
+                        legend=dict(yanchor="bottom",
+                                                y=-0.5,
+                                                xanchor="center",
+                                                x=0.5,
+                                                orientation='h'),
+                        autosize=True)
+                #fig.show()
+                class_percentage_share_path = os.path.join(self.profiling_dir,"4_class_share.html")
+                pio.write_html(fig,file = class_percentage_share_path, auto_play=False)
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+        def get_major_class_pecentage_share():
+            try:
+                df_combined = self.get_target_by_major_class()
+
+                fig = px.pie(df_combined,names='major_class', hole=0.3)
+
+                fig.update_layout(title="Percentage Share of Major Class Labels",
+                                height=800,
+                                width = 800,
+                                paper_bgcolor = "rgba(0,0,0,0)",
+                                plot_bgcolor = "rgba(0,0,0,0)",
+
+                        #annotations = [dict(text="Class".title(), showarrow=False)],
+                        margin_autoexpand=True,
+
+                        legend=dict(yanchor="bottom",
+                                                y=-0.5,
+                                                xanchor="center",
+                                                x=0.5,
+                                                orientation='h'),
+                        autosize=True)
+                #fig.show()
+                major_class_percentage_share_path = os.path.join(self.profiling_dir,"5_major_class_share.html")
+                pio.write_html(fig,file = major_class_percentage_share_path, auto_play=False)
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e                
+        
+        def get_gender_share():
+            try:
+                _, df_combined_plot = self.outliers_handling()
+
+                fig = px.histogram(df_combined_plot, x='sex',color='sex', histfunc="count")
+                fig.update_layout(height=400,width=500, title='Count Plot For Gender',
+                                    paper_bgcolor = "rgba(0,0,0,0)",
+                                    plot_bgcolor = "rgba(0,0,0,0)",                  
+                                    )
+                #fig.show()
+
+                gender_share_path = os.path.join(self.profiling_dir,"6_gender_share.html")
+                pio.write_html(fig,file = gender_share_path, auto_play=False)                
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+        def get_comparative_impact():
+            try:
+                _, df_combined_plot = self.outliers_handling()
+
+                print("="*20)
+                print(df_combined_plot.columns)
+
+                col1 = ['sex','on_thyroxine','on_antithyroid_medication','sick','pregnant','thyroid_surgery']
+                col2 = [ 'I131_treatment','lithium','goitre','tumor','hypopituitary','psych']
+
+                #df = df_combined[cols]
+
+
+                for col in df_combined_plot[col1].columns:
+                    for row in df_combined_plot[col2].columns:
+                        if col != row:
+
+                            fig = px.pie(df_combined_plot,names='Class',facet_col=col,facet_row=row, hole=0.3)
+
+                            fig.update_layout(height=1000,
+                                              width = 1000,
+                                              paper_bgcolor = "rgba(0,0,0,0)",
+                                              plot_bgcolor = "rgba(0,0,0,0)",
+                                              #annotations = [dict(text="Class".title(), showarrow=False)],
+                                              margin_autoexpand=True,
+                                              legend=dict(yanchor="bottom",
+                                                          y=-0.5,
+                                                          xanchor="center",
+                                                          x=0.5,
+                                                          orientation='h'),
+                                              autosize=True)
+                            #fig.show()
+                            #comparative_impact_path = os.path.join(self.profiling_dir,"7_comparative_impact.html")
+                            #pio.write_html(fig,file = comparative_impact_path, auto_play=False)
+
+                            relational_separate_fig_dir = os.path.join(self.profiling_dir,"relational")
+                            os.makedirs(relational_separate_fig_dir, exist_ok=True)
+                            
+                            relational_separate_fig_path = os.path.join(relational_separate_fig_dir, f"{col}_vs_{row}.html")
+                            
+                            pio.write_html(fig, file= relational_separate_fig_path,
+                                           auto_play=False,
+                                           full_html=False,
+                                           config={'plotlyjs': {'include_plotlyjs': 'cdn'}})
+
+                ###########################################################
+
+                # Set the path to the directory containing the sufolders or HTML files
+                dir_path = relational_separate_fig_dir
+
+                # Create a string to hold the HTML code
+                html_code = ''
+
+                # Loop through all directories and files in the directory tree
+
+                for root, dirs, files in os.walk(dir_path):
+                    files = natsort.natsorted(files)
+                    print(files)    
+                    for file in files:
+                        # Check if the file is an HTML file
+                            ###########################################################
+                            
+                        if file.endswith('.html') or file.endswith('.svg'):
+                            #file_list.append(file)
+                            # Read the contents of the file
+                                
+                            with open(os.path.join(root, file), 'r', encoding="utf-8") as f:
+                                file_contents = f.read()
+
+                            # Add the contents of the file to the HTML code string
+                            html_code += file_contents
+                            ##########################################
+
+                            #with open(os.path.join(root, file), 'r') as f:
+                            #    file_contents = f.read()
+
+                            # Add the contents of the file to the HTML code string
+                            #html_code += file_contents
+                        
+                        
+                            
+                # Write the HTML code to a new file
+                with open(os.path.join(self.profiling_dir, '7_relational_mrged.html'), 'a', encoding="utf-8") as f:
+                #with open('comparative_impact.html', 'a') as f:
+                    f.write(html_code)
+                
+                print("removing dir")
+
+                shutil.rmtree(dir_path)
+                
+                print("dir removed")
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+        def get_kde_plot():
+            try:
+                _, df_combined_plot = self.outliers_handling()
+
+                col1 = ['sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication','sick','pregnant','thyroid_surgery',
+                        'I131_treatment','query_hypothyroid','query_hyperthyroid','lithium','goitre','tumor','hypopituitary','psych',
+                        'referral_source', "Class"]
+                #col2 = [ 'I131_treatment','query_hypothyroid','query_hyperthyroid','lithium','goitre','tumor','hypopituitary','psych']
+
+                # generate a sample dataframe
+                df = df_combined_plot.drop(col1,axis=1)
+
+                # create figure and axes objects
+                fig, axes = plt.subplots(nrows=5, ncols=3, squeeze=True,figsize=(12, 12))
+
+                # flatten the axes array for easy indexing
+                axes = axes.flatten()
+
+                # loop through each column and plot the kde on a separate axis
+                for i, col in enumerate(df.columns):
+                    sns.kdeplot(df[col], ax=axes[i], fill=True)
+                    axes[i].set_title(col)
+
+                # remove any unused axes and add a main title
+                for i in range(len(df.columns), len(axes)):
+                    fig.delaxes(axes[i])
+                fig.suptitle('KDE Plot for All Independent Features', fontsize=14)
+
+                # adjust the spacing between the subplots and show the figure
+                fig.tight_layout(pad=2)
+                #plt.show()
+
+                #############################################
+                kde_plot_path = os.path.join(self.profiling_dir,"8_kde_plot.svg")                
+                fig.figure.savefig(kde_plot_path, transparent=True, dpi=300)
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+            
+        ############ Calling Sub Functions  ############
+        get_missing_value_fig()
+        get_outlier_before_fig()
+        get_outlier_after_outlier_handling()
+        get_class_pecentage_share()
+        get_major_class_pecentage_share()
+        get_gender_share()
+        get_comparative_impact()
+        get_kde_plot()
+
+
+
 
     def split_data(self):
         try:
@@ -649,7 +981,6 @@ class DataIngestion:
         except Exception as e:                       
             raise ThyroidException(e, sys)
         
-    
 
     def initiate_data_ingestion(self):
        try:
@@ -660,7 +991,9 @@ class DataIngestion:
            self.get_data_transformer_object()
            self.outliers_handling()
            self.get_target_by_major_class()
-           
+
+           self.profiling()
+
            return self.split_data()
 
        except Exception as e:
@@ -670,4 +1003,3 @@ class DataIngestion:
     def __del__(self):
 
         logging.info(f"{'='*20} Ingestion log completed {'='*20}\n\n")
-    

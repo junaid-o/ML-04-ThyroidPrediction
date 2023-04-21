@@ -15,7 +15,7 @@ from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseData
 from ThyroidPrediction.component.data_ingestion import DataIngestion
 from ThyroidPrediction.component.data_validation import DataValidation
 from ThyroidPrediction.component.data_transformation import DataTransformation
-from ThyroidPrediction.constant import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME
+from ThyroidPrediction.constant import EXPERIMENT_DIR_NAME, EXPERIMENT_FILE_NAME, get_current_time_stamp
 
 import os, sys
 from threading import Thread
@@ -61,7 +61,7 @@ class Pipeline(Thread):
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-        
+
     def start_data_validation(self, data_ingestion_artifact:DataIngestionArtifact) -> DataValidationArtifact:
         try:
             data_validation = DataValidation(data_validation_config= self.config.get_data_validation_config(),
@@ -71,17 +71,6 @@ class Pipeline(Thread):
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-    #def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> DataTransformationArtifact:
-    #def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> BaseDataTransformationArtifact:
-
-    #    try:
-    #        data_transformation = DataTransformation(data_transformation_config=self.config.get_data_transformation_config(),
-    #                                                 data_ingestion_artifact=data_ingestion_artifact,
-    #                                                 data_validation_artifact=data_validation_artifact)
-    #        
-    #        return data_transformation.initiate_data_transformation()
-    #    except Exception as e:
-    #        raise ThyroidException(e, sys)
 
     def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact) -> BaseDataTransformationArtifact:
 
@@ -158,7 +147,7 @@ class Pipeline(Thread):
             self.save_experiment()
 
             data_ingestion_artifact = self.start_data_ingestion()
-            
+
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             
             data_transformation_artifact = self.start_data_transformation(data_ingestion_artifact=data_ingestion_artifact,
