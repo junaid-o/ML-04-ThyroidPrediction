@@ -31,6 +31,11 @@ import pandas as pd
 import os
 import natsort
 
+import ydata_profiling
+from ydata_profiling import ProfileReport
+from ydata_profiling.config import Settings
+import matplotlib.pyplot as plt
+
 
 #class DataIngestion:
 #
@@ -167,8 +172,11 @@ class DataIngestion:
             self.base_data_ingestion_config = data_ingestion_config
             self.base_dataset_path = r"ThyroidPrediction\dataset_base"
 
-            self.profiling_dir = os.path.join("ThyroidPrediction\\artifact", "Profiling", get_current_time_stamp())
-            os.makedirs(self.profiling_dir, exist_ok=True)
+            self.profiling_dir_part_1 = os.path.join("ThyroidPrediction\\artifact", "Profiling", get_current_time_stamp(), "Part_1")
+            os.makedirs(self.profiling_dir_part_1, exist_ok=True)
+
+            self.profiling_dir_part_2 = os.path.join("ThyroidPrediction\\artifact", "Profiling", get_current_time_stamp(), "Part_2")
+            os.makedirs(self.profiling_dir_part_2, exist_ok=True)            
 
         except Exception as e:
             raise ThyroidException(e, sys) from e
@@ -536,6 +544,7 @@ class DataIngestion:
         except Exception as e:
             raise ThyroidException(e,sys) from e   
 
+
     def get_target_by_major_class(self):
         try:
 
@@ -593,7 +602,8 @@ class DataIngestion:
         except Exception as e:
             raise ThyroidException(e,sys) from e
 
-    def profiling(self):
+
+    def profiling_report(self):
         def get_missing_value_fig():
             try:
 
@@ -610,12 +620,13 @@ class DataIngestion:
                 plt.title("Revealed Missing Values", fontdict={'fontsize': 20}, pad=12)
                 #plt.show()
 
-                missing_value_fig_path = os.path.join(self.profiling_dir, "1_missing_values.png")
+                missing_value_fig_path = os.path.join(self.profiling_dir_part_1, "1_missing_values.svg")
                 plt.savefig(missing_value_fig_path, dpi=300, bbox_inches='tight')
 
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
+
 
         def get_outlier_before_fig():
             try:
@@ -649,12 +660,13 @@ class DataIngestion:
                 fig.update_xaxes(showline=False,showgrid=False)
                 #fig.show()
                 ##########################################
-                outlier_fig_before_path = os.path.join(self.profiling_dir, "2_outliers_before.html")
+                outlier_fig_before_path = os.path.join(self.profiling_dir_part_1, "2_outliers_before.html")
                 pio.write_html(fig,file = outlier_fig_before_path, auto_play=False)                
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
-            
+
+
         def get_outlier_after_outlier_handling():
             try:
                 df_combined, _ = self.outliers_handling()
@@ -684,11 +696,12 @@ class DataIngestion:
                 fig.update_xaxes(showline=False,showgrid=False)
                 #fig.show()
                 ##########################################
-                outliers_fig_after_path = os.path.join(self.profiling_dir,"3_outliers_after.html")
+                outliers_fig_after_path = os.path.join(self.profiling_dir_part_1, "3_outliers_after.html")
                 pio.write_html(fig,file = outliers_fig_after_path, auto_play=False)
             except Exception as e:
                 raise ThyroidException(e, sys) from e
-            
+
+
         def get_class_pecentage_share():
             try:
                 df_combined, _ = self.outliers_handling()
@@ -710,11 +723,12 @@ class DataIngestion:
                                                 orientation='h'),
                         autosize=True)
                 #fig.show()
-                class_percentage_share_path = os.path.join(self.profiling_dir,"4_class_share.html")
+                class_percentage_share_path = os.path.join(self.profiling_dir_part_1,"4_class_share.html")
                 pio.write_html(fig,file = class_percentage_share_path, auto_play=False)
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
+
 
         def get_major_class_pecentage_share():
             try:
@@ -738,12 +752,13 @@ class DataIngestion:
                                                 orientation='h'),
                         autosize=True)
                 #fig.show()
-                major_class_percentage_share_path = os.path.join(self.profiling_dir,"5_major_class_share.html")
+                major_class_percentage_share_path = os.path.join(self.profiling_dir_part_1, "5_major_class_share.html")
                 pio.write_html(fig,file = major_class_percentage_share_path, auto_play=False)
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e                
-        
+
+
         def get_gender_share():
             try:
                 _, df_combined_plot = self.outliers_handling()
@@ -755,11 +770,12 @@ class DataIngestion:
                                     )
                 #fig.show()
 
-                gender_share_path = os.path.join(self.profiling_dir,"6_gender_share.html")
+                gender_share_path = os.path.join(self.profiling_dir_part_1, "6_gender_share.html")
                 pio.write_html(fig,file = gender_share_path, auto_play=False)                
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
+
 
         def get_comparative_impact():
             try:
@@ -796,7 +812,7 @@ class DataIngestion:
                             #comparative_impact_path = os.path.join(self.profiling_dir,"7_comparative_impact.html")
                             #pio.write_html(fig,file = comparative_impact_path, auto_play=False)
 
-                            relational_separate_fig_dir = os.path.join(self.profiling_dir,"relational")
+                            relational_separate_fig_dir = os.path.join(self.profiling_dir_part_2, "relational")
                             os.makedirs(relational_separate_fig_dir, exist_ok=True)
                             
                             relational_separate_fig_path = os.path.join(relational_separate_fig_dir, f"{col}_vs_{row}.html")
@@ -804,7 +820,7 @@ class DataIngestion:
                             pio.write_html(fig, file= relational_separate_fig_path,
                                            auto_play=False,
                                            full_html=False,
-                                           config={'plotlyjs': {'include_plotlyjs': 'cdn'}})
+                                           )
 
                 ###########################################################
 
@@ -818,7 +834,9 @@ class DataIngestion:
 
                 for root, dirs, files in os.walk(dir_path):
                     files = natsort.natsorted(files)
+                    
                     print(files)    
+                    
                     for file in files:
                         # Check if the file is an HTML file
                             ###########################################################
@@ -834,27 +852,19 @@ class DataIngestion:
                             html_code += file_contents
                             ##########################################
 
-                            #with open(os.path.join(root, file), 'r') as f:
-                            #    file_contents = f.read()
-
-                            # Add the contents of the file to the HTML code string
-                            #html_code += file_contents
-                        
                         
                             
                 # Write the HTML code to a new file
-                with open(os.path.join(self.profiling_dir, '7_relational_mrged.html'), 'a', encoding="utf-8") as f:
+                with open(os.path.join(self.profiling_dir_part_2, '7_relational_mrged.html'), 'a', encoding="utf-8") as f:
                 #with open('comparative_impact.html', 'a') as f:
-                    f.write(html_code)
                 
-                print("removing dir")
+                    f.write(html_code)
 
                 shutil.rmtree(dir_path)
-                
-                print("dir removed")
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
+
 
         def get_kde_plot():
             try:
@@ -889,13 +899,106 @@ class DataIngestion:
                 #plt.show()
 
                 #############################################
-                kde_plot_path = os.path.join(self.profiling_dir,"8_kde_plot.svg")                
+                kde_plot_path = os.path.join(self.profiling_dir_part_1,"8_kde_plot.svg")                
                 fig.figure.savefig(kde_plot_path, transparent=True, dpi=300)
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
             
+
+        def get_yDataprofile():
+            try:
+                _, df = self.outliers_handling()
+                df_major_class = self.get_target_by_major_class()
+                df["major_class"] = df_major_class["major_class"]
+                yDataprofile = ProfileReport(df=df,
+                                            explorative=True,
+                                            infer_dtypes=True,
+                                            orange_mode=True,
+                                            dark_mode=True,
+                                            tsmode=False,                        
+                                            plot={"dpi": 200, "image_format": "svg"},                        
+                                            title='Profiling Report',
+                                            progress_bar=True,
+                                            html={"style": {"full_width": True, 'primary_color':'#000000'}, "minify":True},
+                                            correlations={ "pearson": {"calculate": True},
+                                                            "spearman": {"calculate": True},
+                                                            "kendall": {"calculate": True},
+                                                            "phi_k": {"calculate": True},
+                                                        },
+                                            
+                                            missing_diagrams = {'bar': True,
+                                                                'matrix':True,
+                                                                'hatmap':False
+                                                                },                        
+                                            interactions= None,                                         
+                                        )
+                
+                yDataprofile_path = os.path.join(self.profiling_dir_part_1, "0_yDataprofile.html")
+                yDataprofile.to_file(yDataprofile_path, silent=True)
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+
+        def get_merged_report():
+            try:
+
+
+                # Set the path to the directory containing the sufolders or HTML files
+                dir_path = self.profiling_dir_part_1
+
+                # Create a string to hold the HTML code
+                html_code = ''
+
+                # Loop through all directories and files in the directory tree
+
+                for root, dirs, files in os.walk(dir_path):
+                    files = natsort.natsorted(files)
+                    
+                    print(files)    
+                    
+                    for file in files:
+                        # Check if the file is an HTML file
+                            ###########################################################
+                            
+                        if file.endswith('.html') or file.endswith('.svg'):
+                            #file_list.append(file)
+                            # Read the contents of the file
+                                
+                            with open(os.path.join(root, file), 'r', encoding="utf-8") as f:
+                                file_contents = f.read()
+
+                            # Add the contents of the file to the HTML code string
+                            html_code += file_contents
+                            ##########################################
+
+                        
+            
+
+                # Write the HTML code to a new file
+                with open(os.path.join(self.profiling_dir_part_1, 'ProfileReport_1.html'), 'a', encoding="utf-8") as f:
+                #with open('comparative_impact.html', 'a') as f:
+                
+                    f.write(html_code)
+                ######################### CLEARING ALL FILES Other THAN ONE SPECIFID FILE ###########################
+                #shutil.rmtree(dir_path)    # Clear all the files and folder irrespective to that if they contain data or not
+
+                dir_path = self.profiling_dir_part_1
+                except_file = 'ProfileReport_1.html'
+
+                for file_name in os.listdir(dir_path):
+                    if file_name != except_file:
+                        os.remove(os.path.join(dir_path, file_name))                
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e
+
+            
+
+
         ############ Calling Sub Functions  ############
+        get_yDataprofile()
         get_missing_value_fig()
         get_outlier_before_fig()
         get_outlier_after_outlier_handling()
@@ -904,6 +1007,8 @@ class DataIngestion:
         get_gender_share()
         get_comparative_impact()
         get_kde_plot()
+        get_merged_report()
+        
 
 
 
@@ -992,7 +1097,7 @@ class DataIngestion:
            self.outliers_handling()
            self.get_target_by_major_class()
 
-           self.profiling()
+           self.profiling_report()
 
            return self.split_data()
 
