@@ -1,3 +1,5 @@
+import shutil
+import natsort
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.entity.config_entity import DataValidationConfig
@@ -303,8 +305,48 @@ class DataValidation:
             
             report.save_html(filename= report_page_file_path)
             
-            #####################################################################
-            
+            ##################  COPYING DRIFT REPORT TO TMPLATS FOLDER  #########################
+
+            def get_copy_of_drift_report():
+                try:
+
+                    ####################### COPYING PROFILE_REPORT_2 TO TEMPLATE #######################################
+
+                    src_dir = os.path.join("ThyroidPrediction\\artifact", "data_validation")
+                    dest_dir = os.path.join("templates")
+
+                    # Get the list of folders in the source directory
+                    folders = natsort.natsorted(os.listdir(src_dir))
+
+                    # Get the most recent folder
+                    most_recent_folder = folders[-1]
+
+                    # Construct the path to the most recent folder
+                    most_recent_folder_path = os.path.join(src_dir, most_recent_folder)
+
+                    # Get the list of files in the most recent folder
+                    files = natsort.natsorted(os.listdir(most_recent_folder_path))
+
+                    # Get the most recent html file not json
+                    #most_recent_file = files[1]
+                    most_recent_file = "drift_report.html"
+
+                    
+
+                    # Construct the path to the most recent file
+                    most_recent_file_path = os.path.join(most_recent_folder_path, most_recent_file)
+
+                    # Copy the most recent file to the destination directory
+                    shutil.copy(most_recent_file_path, dest_dir)                              
+
+                except Exception as e:
+                    raise ThyroidException(e, sys) from e            
+                
+            #########################################################
+
+            get_copy_of_drift_report()
+
+            ########################################################
             
             return report
 

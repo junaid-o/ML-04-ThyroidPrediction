@@ -784,8 +784,8 @@ class DataIngestion:
                 print("="*20)
                 print(df_combined_plot.columns)
 
-                col1 = ['sex','on_thyroxine','on_antithyroid_medication','sick','pregnant','thyroid_surgery']
-                col2 = [ 'I131_treatment','lithium','goitre','tumor','hypopituitary','psych']
+                col1 = ['sex','on_thyroxine','on_antithyroid_medication','pregnant','thyroid_surgery']
+                col2 = [ 'I131_treatment','lithium','goitre','tumor','hypopituitary']
 
                 #df = df_combined[cols]
 
@@ -941,10 +941,8 @@ class DataIngestion:
                 raise ThyroidException(e, sys) from e
 
 
-        def get_merged_report():
+        def get_profile_report_1():
             try:
-
-
                 # Set the path to the directory containing the sufolders or HTML files
                 dir_path = self.profiling_dir_part_1
 
@@ -989,12 +987,112 @@ class DataIngestion:
 
                 for file_name in os.listdir(dir_path):
                     if file_name != except_file:
-                        os.remove(os.path.join(dir_path, file_name))                
+                        os.remove(os.path.join(dir_path, file_name))
+
+                ####################### COPYING PROFILE_REPORT_1 TO TEMPLATE #######################################
+
+                src_dir = os.path.join("ThyroidPrediction\\artifact", "Profiling")
+                dest_dir = os.path.join("templates")
+
+                # Get the list of folders in the source directory
+                folders = natsort.natsorted(os.listdir(src_dir))
+
+                # Get the most recent folder
+                most_recent_folder = folders[-1]
+
+                # Construct the path to the most recent folder
+                most_recent_folder_path = os.path.join(src_dir, most_recent_folder, "Part_1")
+
+                # Get the list of files in the most recent folder
+                files = natsort.natsorted(os.listdir(most_recent_folder_path))
+
+                # Get the most recent file
+                most_recent_file = files[-1]
+
+                # Construct the path to the most recent file
+                most_recent_file_path = os.path.join(most_recent_folder_path, most_recent_file)
+
+                # Copy the most recent file to the destination directory
+                shutil.copy(most_recent_file_path, dest_dir)                              
 
             except Exception as e:
                 raise ThyroidException(e, sys) from e
 
-            
+        def get_profile_report_2():
+            try:
+                # Set the path to the directory containing the sufolders or HTML files
+                dir_path = self.profiling_dir_part_2
+
+                # Create a string to hold the HTML code
+                html_code = ''
+
+                # Loop through all directories and files in the directory tree
+
+                for root, dirs, files in os.walk(dir_path):
+                    files = natsort.natsorted(files)
+                    
+                    print(files)    
+                    
+                    for file in files:
+                        # Check if the file is an HTML file
+                            ###########################################################
+                            
+                        if file.endswith('.html') or file.endswith('.svg'):
+                            #file_list.append(file)
+                            # Read the contents of the file
+                                
+                            with open(os.path.join(root, file), 'r', encoding="utf-8") as f:
+                                file_contents = f.read()
+
+                            # Add the contents of the file to the HTML code string
+                            html_code += file_contents
+                            ##########################################            
+
+                # Write the HTML code to a new file
+                with open(os.path.join(self.profiling_dir_part_2, 'ProfileReport_2.html'), 'a', encoding="utf-8") as f:
+                #with open('comparative_impact.html', 'a') as f:
+                
+                    f.write(html_code)
+                ######################### CLEARING ALL FILES Other THAN ONE SPECIFID FILE ###########################
+                #shutil.rmtree(dir_path)    # Clear all the files and folder irrespective to that if they contain data or not
+
+                dir_path = self.profiling_dir_part_2
+                except_file = 'ProfileReport_2.html'
+
+                for file_name in os.listdir(dir_path):
+                    if file_name != except_file:
+                        os.remove(os.path.join(dir_path, file_name))                
+
+                ####################### COPYING PROFILE_REPORT_2 TO TEMPLATE #######################################
+
+                src_dir = os.path.join("ThyroidPrediction\\artifact", "Profiling")
+                dest_dir = os.path.join("templates")
+
+                # Get the list of folders in the source directory
+                folders = natsort.natsorted(os.listdir(src_dir))
+
+                # Get the most recent folder
+                most_recent_folder = folders[-1]
+
+                # Construct the path to the most recent folder
+                most_recent_folder_path = os.path.join(src_dir, most_recent_folder, "Part_2")
+
+                # Get the list of files in the most recent folder
+                files = natsort.natsorted(os.listdir(most_recent_folder_path))
+
+                # Get the most recent file
+                most_recent_file = files[-1]
+
+                # Construct the path to the most recent file
+                most_recent_file_path = os.path.join(most_recent_folder_path, most_recent_file)
+
+                # Copy the most recent file to the destination directory
+                shutil.copy(most_recent_file_path, dest_dir)                              
+
+
+            except Exception as e:
+                raise ThyroidException(e, sys) from e            
+
 
 
         ############ Calling Sub Functions  ############
@@ -1007,10 +1105,10 @@ class DataIngestion:
         get_gender_share()
         get_comparative_impact()
         get_kde_plot()
-        get_merged_report()
+        get_profile_report_1()
+        get_profile_report_2()
         
-
-
+        
 
 
     def split_data(self):

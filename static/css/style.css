@@ -1,6 +1,4 @@
-*{margin:10;
-  padding:0;
-  width: 100;
+*{
   justify-content: space-around;
   }
 
@@ -145,7 +143,7 @@ body {
   max-width: 1200px; /* adjust as needed */
   min-width: 1200px;
   margin: 10px auto;
-  margin-bottom: 100px;}
+  margin-bottom: 50px;}
 
 
 .cardBox {
@@ -269,18 +267,44 @@ body {
   
 }
 */
-
-.testimonials-container#testimonials {
+.container#columns {
   display: flex;
   flex-wrap: wrap;
    place-items: center;
   justify-content: space-center;
-  min-width:950px;
+  max-zoom: 100%;
+  min-zoom: 80%;
+  min-width: 1000px;
+  max-width: 800px;
+  
+}
+
+
+.right-column .testimonials-container#report {
+
+  display: flex;
+  flex-wrap: wrap;
+   place-items: left;
+  justify-content:space-between;
+  min-width:150px;  /* 950px */
+  max-width: 150px;/* adjust as needed */
+  margin-left: -100%; 
+}
+
+
+  
+
+.left-column .testimonials-container#testimonials {
+  display: flex;
+  flex-wrap: wrap;
+   place-items: center;
+  justify-content: space-center;
+  min-width:950px;  /* 950px */
   max-width: 300px;/* adjust as needed */
   margin: 0px auto;}
 
 
-}
+
 
 .testimotionals {
    display:flex;
@@ -290,6 +314,25 @@ justify-content: space-center;
 }
 
 
+.right-column .testimotionals .card {
+
+  display:flex;
+   flex-wrap: wrap;
+    position:relative;
+    overflow:visible;
+    width:150px;
+    height:345px;
+    margin-right: 10%;
+
+    background: #333;
+    padding: 0px;
+    box-sizing:border-box;
+    text-align:center;
+    box-shadow:0 10px 40px rgba(0,0,0,.5)
+  }
+
+
+
 .testimotionals .card {
 
 display:flex;
@@ -297,10 +340,10 @@ display:flex;
   position:relative;
   overflow:visible;
   width:300px;
-  height:200px;
+  height:160px;
   margin:10px auto;
-  margin-right:5%;
-  margin-left: -10%;
+  margin-right:50%;
+  margin-left: -40%;
   background: #333;
   padding: 0px;
 
@@ -323,10 +366,17 @@ display:flex;
 .testimotionals .card:hover  .layer{
   /*top:0;*/
   /*left: calc(50% - 2px);*/
-  left: -55%;
+  left: -45%;
   width: 80%;
   height: 100%;
+  font-size: xx-small;
+  
+
+  /*opacity: 0;*/
+  
 }
+
+
 
 
 .testimotionals .card .content {
@@ -372,12 +422,12 @@ body{
 
 /* Style for navbar */
 .navbar {
-  background-color: #283142; /* Change background color of navbar */
-  height: 80px; /* Change height of navbar */
+  background-color: #000000; /* Change background color of navbar default #283142*/
+  height: 50px; /* Change height of navbar */
 }
 
 .navbar-brand {
-  color: red; /* Change text color of navbar brand */
+  color: rgb(253, 0, 0); /* Change text color of navbar brand */
   font-weight: bold; /* Add bold font-weight to navbar brand */
   font-size: 24px; /* Change font size of navbar brand */
 }
@@ -409,3 +459,13 @@ body{
 
 
 /*********************************************\
+/* Dividing The Screen Into Two Columns */
+.left-column {
+  
+  width: 80%;
+}
+
+.right-column {
+  
+  width: 10%;
+}

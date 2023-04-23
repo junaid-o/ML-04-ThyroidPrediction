@@ -85,6 +85,34 @@ def index():
         return str(e)
 
 
+@app.route('/reports', methods=['GET', 'POST'])
+def render_eda():
+    try:
+        return render_template('eda.html', report1 = "ProfileReport_1.html")
+    except Exception as e:
+        return str(e)
+
+@app.route('/reports_1', methods=['GET', 'POST'])
+def render_profile_report_1():
+    try:
+        return render_template("ProfileReport_1.html")
+    except Exception as e:
+        raise ThyroidException(e, sys) from e
+    
+@app.route('/reports_2', methods=['GET', 'POST'])
+def render_profile_report_2():
+    try:
+        return render_template("ProfileReport_2.html")
+    except Exception as e:
+        raise ThyroidException(e, sys) from e    
+    
+@app.route('/reports_3', methods=['GET', 'POST'])
+def render_drift_report():
+    try:
+        return render_template("drift_report.html")
+    except Exception as e:
+        raise ThyroidException(e, sys) from e        
+
 @app.route('/view_experiment_hist', methods=['GET', 'POST'])
 def view_experiment_history():
     logging.info(f"req_path: view_experiment_hist")
