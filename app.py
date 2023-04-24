@@ -326,7 +326,7 @@ def saved_models_dir(req_path):
 
     result = {
         "files": files,
-        "parent_folder": os.path.dirname(abs_path)
+        "parent_folder": os.path.dirname(abs_path),
         "parent_label": abs_path
     }
     return render_template('saved_models_files.html', result=result)
