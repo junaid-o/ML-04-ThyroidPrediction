@@ -1,3 +1,4 @@
+import os
 
 import pandas as pd
 from ThyroidPrediction.exception import ThyroidException
@@ -12,7 +13,7 @@ from ThyroidPrediction.entity.model_factory import evaluate_regression_model, ev
 
 
 
-class HousingEstimatorModel:
+class ThyroidEstimatorModel:
     def __init__(self, preprocessing_object, trained_model_object):
         """
         TrainedModel constructor
@@ -145,7 +146,7 @@ class ModelTrainer:
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-    def initiate_model_trainer(self)->ClassModelTrainerArtifact:
+    def initiate_model_trainer(self) -> ClassModelTrainerArtifact:
         try:
             logging.info(f"Loading transformed training dataset")
             transformed_train_file_path = self.data_transformation_artifact.transformed_resampled_train_file_path
@@ -185,16 +186,16 @@ class ModelTrainer:
             print("========== model trainer: Model Factory =============")
             print("Model factory done! going to base_accuracy")
             print("============================================================="*2)            
-            
 
             base_accuracy = self.model_trainer_config.base_accuracy
+
             logging.info(f"Expected accuracy: {base_accuracy}")
 
             print("========== model trainer: Model Factory base accuracy =============")
             print("Model factory done! going to base_accuracy")
             print("============================================================="*2)  
 
-            logging.info(f"Initiating operation model selecttion")
+            logging.info(f"Initiating operation model selection")
             best_model = model_factory.get_best_model(X=x_train,y=y_train,base_accuracy=base_accuracy)
             
             logging.info(f"Best model found on training dataset: {best_model}")
@@ -216,11 +217,9 @@ class ModelTrainer:
 
             #metric_info:MetricInfoArtifact = evaluate_regression_model(model_list=model_list,X_train=x_train,y_train=y_train,X_test=x_test,y_test=y_test,base_accuracy=base_accuracy)
 
-            metric_info:MetricInfoArtifact = evaluate_classification_model(model_list=model_list,X_train=x_train,y_train=y_train,X_test=x_test,y_test=y_test,base_accuracy=base_accuracy)
+            metric_info: MetricInfoArtifact = evaluate_classification_model(model_list=model_list,X_train=x_train,y_train=y_train,X_test=x_test,y_test=y_test,base_accuracy=base_accuracy)
 
             ####################################################################################################################
-
-
 
             logging.info(f"Best found model on both training and testing dataset.")
 
@@ -228,18 +227,18 @@ class ModelTrainer:
             model_object = metric_info.model_object
 
 
-            trained_model_file_path=self.model_trainer_config.trained_model_file_path
+            trained_model_file_path= self.model_trainer_config.trained_model_file_path
 
             print('======== Model Trainer: trained model file path ======='*2)
             print(trained_model_file_path)
             print("================================================================"*2)                        
 
-            housing_model = HousingEstimatorModel(preprocessing_object=None, trained_model_object=model_object)
+            thyroid_model = ThyroidEstimatorModel(preprocessing_object=None, trained_model_object=model_object)
 
             logging.info(f"Saving model at path: {trained_model_file_path}")
             
 
-            save_object(file_path=trained_model_file_path, obj=housing_model)
+            save_object(file_path=trained_model_file_path, obj=thyroid_model)
 
             
             #model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",

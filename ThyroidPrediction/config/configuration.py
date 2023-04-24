@@ -191,7 +191,7 @@ class Configuration:
                                                 data_transformation_config_info[DATA_TRANSFORMATION_TEST_DIR_NAME_KEY]
                                                 )
             
-            data_transformation_config=DataTransformationConfig(add_bedroom_per_room=add_bedroom_per_room,
+            data_transformation_config=DataTransformationConfig(
                                                                 preprocessed_object_file_path=preprocessed_object_file_path,
                                                                 transformed_train_dir=transformed_train_dir,
                                                                 transformed_test_dir=transformed_test_dir

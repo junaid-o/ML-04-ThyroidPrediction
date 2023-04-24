@@ -2,6 +2,8 @@ import importlib
 import numpy as np
 import os
 import sys
+
+import pandas as pd
 import yaml
 
 from pyexpat import model
@@ -12,7 +14,7 @@ from sklearn.metrics import balanced_accuracy_score, f1_score, r2_score,mean_squ
 from collections import namedtuple
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
-
+from ThyroidPrediction.entity.config_entity import ModelTrainerConfig
 
 
 GRID_SEARCH_KEY = 'grid_search'
@@ -40,7 +42,7 @@ MetricInfoArtifact = namedtuple("MetricInfoArtifact",
                                  "train_balanced_accuracy", "test_balanced_accuracy",                                 
                                   "model_accuracy", "index_number"])
 
-def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.1)->MetricInfoArtifact:
+def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy: float= "base_accuracy")->MetricInfoArtifact:
     """
     Description:
     This function compare multiple classification model return best model
@@ -63,11 +65,18 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
     """
     try:
         
-    
+        f1_train = []
+        f1_test = []
+        balanced_accuracy_train = []
+        balanced_accuracy_test = []
+        balanced_accuracy_diff = []
+        models = []
+
         index_number = 0
         metric_info_artifact = None
         for model in model_list:
             model_name = str(model)  #getting model name based on model object
+            models.append(model)
 
             logging.info(f"{'>>'*30}Started evaluating model: [{type(model).__name__}] {'<<'*30}")
             
@@ -79,14 +88,30 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             train_f1 = f1_score(y_train, y_train_pred, average="weighted")
             test_f1 = f1_score(y_test, y_test_pred, average="weighted")
 
+            f1_train.append(train_f1)
+            f1_test.append(test_f1)
+
             #Calculating mean squared error on training and testing dataset
             train_balanced_accuracy_score = balanced_accuracy_score(y_train, y_train_pred)
             test_balanced_accuracy_score = balanced_accuracy_score(y_test, y_test_pred)
 
+            balanced_accuracy_train.append(train_balanced_accuracy_score)
+            balanced_accuracy_test.append(test_balanced_accuracy_score)
+
             # Calculating harmonic mean of train_accuracy and test_accuracy
+            # Fowlkes-Mallows index. It is a measure of similarity between two sets of clustering or classification results,
+            #  where the two sets of results are compared against a reference (or ground truth) clustering or classification.
+            #  Specifically, the Fowlkes-Mallows index combines measures of precision and recall to give an overall similarity
+            #  score between the two sets of results.
+            #  The Fowlkes-Mallows index is a weighted harmonic mean of precision and recall.
+
             model_accuracy = (2 * (train_balanced_accuracy_score * test_balanced_accuracy_score)) / (train_balanced_accuracy_score + test_balanced_accuracy_score)
             diff_test_train_acc = abs(test_balanced_accuracy_score - train_balanced_accuracy_score)
-            
+
+            balanced_accuracy_diff.append(diff_test_train_acc)
+
+            ################################################################
+
             #logging all important metric
             logging.info(f"{'>>'*30} Score {'<<'*30}")
             logging.info(f"Train F1_weighted\t\t Test F1_weighted\t\t Train Balanced Accuracy Score\t\t Test Balanced Accuracy Score\t\t Average Score")
@@ -100,9 +125,13 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             #if model accuracy is greater than base accuracy and train and test score is within certain thershold
             #we will accept that model as accepted model
             logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
-            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.2:
+            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
                 #base_accuracy = model_accuracy
                 
+                print('='*20)
+                print("TEST_1: MODEL IS ABOVE BASE ACCURACY")
+                print('='*20)
+
                 logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
                 
                 metric_info_artifact = MetricInfoArtifact(model_name=model_name,
@@ -119,7 +148,25 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             index_number += 1            
         if metric_info_artifact is None:
 
+            print('='*20)
+            print("TEST_2: MODEL NOT ACCEPTED")
+
             logging.info(f"No model found with higher accuracy than base accuracy")
+
+        #################################################################
+
+        data = {"models": models,
+                "f1_train_weighted": f1_train,
+                "f1_test_weighted": f1_test,
+                "balanced_accuracy_train": balanced_accuracy_train,
+                "balanced_accuracy_test": balanced_accuracy_test,
+                "balanced_accuracy_diff": balanced_accuracy_diff}
+        df_scores = pd.DataFrame(data= data)
+
+        #scores_path = os.makedirs(os.path.join(ModelTrainerConfig.trained_model_file_path, "scores"), exist_ok=True)
+        #df_scores.to_csv(os.path.join(scores_path, "scores.csv"), index=False)
+        ################################################################
+
 
         return metric_info_artifact
         
@@ -128,7 +175,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
     
 
 
-def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.1) -> MetricInfoArtifact:
+def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.01) -> MetricInfoArtifact:
     """
     Description:
     This function compare multiple regression model return best model
@@ -187,7 +234,7 @@ def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.n
 
             #if model accuracy is greater than base accuracy and train and test score is within certain thershold
             #we will accept that model as accepted model
-            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.2:
+            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
                 base_accuracy = model_accuracy
                 metric_info_artifact = MetricInfoArtifact(model_name=model_name,
                                                           model_object=model,
@@ -329,6 +376,7 @@ class ModelFactory:
             
             message = f'{">>"* 30} f"Training {type(initialized_model.model).__name__} Started." {"<<"*30}'
             logging.info(message)
+
             grid_search_cv.fit(input_feature, output_feature)
             message = f'{">>"* 30} f"Training {type(initialized_model.model).__name__}" completed {"<<"*30}'
             grid_searched_best_model = GridSearchedBestModel(model_serial_number=initialized_model.model_serial_number,
@@ -429,7 +477,7 @@ class ModelFactory:
             raise ThyroidException(e, sys) from e
 
     @staticmethod
-    def get_best_model_from_grid_searched_best_model_list(grid_searched_best_model_list: List[GridSearchedBestModel], base_accuracy=0.1) -> BestModel:
+    def get_best_model_from_grid_searched_best_model_list(grid_searched_best_model_list: List[GridSearchedBestModel], base_accuracy= "base_accuracy") -> BestModel:
         try:
             best_model = None
             for grid_searched_best_model in grid_searched_best_model_list:
@@ -445,7 +493,7 @@ class ModelFactory:
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-    def get_best_model(self, X, y,base_accuracy=0.1) -> BestModel:
+    def get_best_model(self, X, y,base_accuracy=0.01) -> BestModel:
 
         try:
             logging.info("Started Initializing model from config file")
