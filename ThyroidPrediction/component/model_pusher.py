@@ -26,14 +26,34 @@ class ModelPusher:
             export_model_file_path = os.path.join(export_dir, model_file_name)
             
             print("============= Model Pusher: ========="*5)
+            print(evaluated_model_file_path)
             print(export_dir)
+            print(model_file_name)
+            print(export_model_file_path)
             print("==================="*4)
 
+            ################### PATH PREPARATION FOR SCORE.CSV FILE COPYING INTO SAVED_MODEL FOLDER ##########
+            head, _ = os.path.split(evaluated_model_file_path)
+            score_file_path_source = os.path.join(head,"score", "model_score.csv")
+            export_score_dir = os.path.join(export_dir, "score")
+            os.makedirs(export_score_dir, exist_ok=True)
+
+            score_file_path_destination = os.path.join(export_score_dir, "model_score.csv")
+
+            print("============= Model Pusher : Score_file_path ========="*5)
+            print(score_file_path_source)
+            print(score_file_path_destination)
+
+            ##################################################################
 
             logging.info(f"Exporting model file: [{export_model_file_path}]")
             os.makedirs(export_dir, exist_ok=True)
 
             shutil.copy(src=evaluated_model_file_path, dst=export_model_file_path)
+
+            shutil.copy(src=score_file_path_source, dst=score_file_path_destination)    # COPY Score file too
+
+
 
             # we can call a function to save model to Azure blob storage/ google cloud strorage / s3 bucket
             

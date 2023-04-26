@@ -1096,6 +1096,7 @@ class DataIngestion:
 
 
         ############ Calling Sub Functions  ############
+
         get_yDataprofile()
         get_missing_value_fig()
         get_outlier_before_fig()

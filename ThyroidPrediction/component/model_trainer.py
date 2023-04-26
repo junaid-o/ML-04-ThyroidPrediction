@@ -151,7 +151,7 @@ class ModelTrainer:
             logging.info(f"Loading transformed training dataset")
             transformed_train_file_path = self.data_transformation_artifact.transformed_resampled_train_file_path
 
-            print('======== Modl Trainer V1: transformed_train_file_path ======='*2)
+            print('======== Model Trainer V1: transformed_train_file_path ======='*2)
             print(transformed_train_file_path)
             print("================================================================"*2)
 
@@ -219,6 +219,9 @@ class ModelTrainer:
 
             metric_info: MetricInfoArtifact = evaluate_classification_model(model_list=model_list,X_train=x_train,y_train=y_train,X_test=x_test,y_test=y_test,base_accuracy=base_accuracy)
 
+            metric_info, model_scores = metric_info
+
+            print(model_scores)
             ####################################################################################################################
 
             logging.info(f"Best found model on both training and testing dataset.")
@@ -240,7 +243,16 @@ class ModelTrainer:
 
             save_object(file_path=trained_model_file_path, obj=thyroid_model)
 
-            
+            #################### Exporting SCORE CSV FILE ################
+
+            head, tail= os.path.split(trained_model_file_path)
+
+            model_scores_file_dir = os.path.join(head, "score")
+            os.makedirs(model_scores_file_dir)
+            model_scores_file_path = os.path.join(model_scores_file_dir, "model_score.csv")
+            model_scores.to_csv(model_scores_file_path, index=False)
+            #####################################################################
+
             #model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",
             #                                              trained_model_file_path=trained_model_file_path,
             #                                              train_rmse=metric_info.train_rmse,

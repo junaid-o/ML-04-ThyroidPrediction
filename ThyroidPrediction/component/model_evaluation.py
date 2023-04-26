@@ -1,7 +1,8 @@
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.entity.config_entity import ModelEvaluationConfig
-from ThyroidPrediction.entity.artifact_entity import ClassModelTrainerArtifact, DataIngestionArtifact,DataValidationArtifact,ModelTrainerArtifact,ModelEvaluationArtifact
+from ThyroidPrediction.entity.artifact_entity import ClassModelTrainerArtifact, DataIngestionArtifact, \
+    DataValidationArtifact, ModelTrainerArtifact, ModelEvaluationArtifact, BaseDataTransformationArtifact
 from ThyroidPrediction.constant import *
 import numpy as np
 import os
@@ -14,13 +15,15 @@ from ThyroidPrediction.entity.model_factory import evaluate_classification_model
 
 class ModelEvaluation:
 
-    def __init__(self, model_evaluation_config: ModelEvaluationConfig, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ClassModelTrainerArtifact):
+    #def __init__(self, model_evaluation_config: ModelEvaluationConfig, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ClassModelTrainerArtifact):
+    def __init__(self, model_evaluation_config: ModelEvaluationConfig, data_transformation_artifact: BaseDataTransformationArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ClassModelTrainerArtifact):
         try:
             logging.info(f"{'>>' * 30}Model Evaluation log started.{'<<' * 30} ")
     
             self.model_evaluation_config = model_evaluation_config
             self.model_trainer_artifact = model_trainer_artifact
-            self.data_ingestion_artifact = data_ingestion_artifact
+            #self.data_ingestion_artifact = data_ingestion_artifact
+            self.data_transformation_artifact = data_transformation_artifact
             self.data_validation_artifact = data_validation_artifact
     
         except Exception as e:
@@ -103,12 +106,16 @@ class ModelEvaluation:
 
             trained_model_object = load_object(file_path=trained_model_file_path)
 
-            train_file_path = self.data_ingestion_artifact.train_file_path
-            test_file_path = self.data_ingestion_artifact.test_file_path
+            #test_file_path = self.data_ingestion_artifact.test_file_path
+            #train_file_path = self.data_ingestion_artifact.train_file_path
+
+            train_file_path = self.data_transformation_artifact.transformed_resampled_train_file_path
+            test_file_path = self.data_transformation_artifact.transformed_non_resampled_test_file_path
 
 
-            print("========== model evaluation v4: train file path =============")
+            print("========== model evaluation v4: train and test file path =============")
             print(train_file_path)
+            print(test_file_path)
             print("============================================================="*2)
 
 
@@ -173,7 +180,7 @@ class ModelEvaluation:
             #                                                   base_accuracy=self.model_trainer_artifact.model_accuracy,
             #                                                   )
 
-            metric_info_artifact = evaluate_classification_model(model_list=model_list,
+            metric_info_artifact, _ = evaluate_classification_model(model_list=model_list,
                                                    X_train=train_dataframe,
                                                    y_train=train_target_arr,
                                                    X_test=test_dataframe,

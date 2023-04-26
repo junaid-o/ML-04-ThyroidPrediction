@@ -126,6 +126,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             #we will accept that model as accepted model
             logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
             if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
+            
                 #base_accuracy = model_accuracy
                 
                 print('='*20)
@@ -168,7 +169,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
         ################################################################
 
 
-        return metric_info_artifact
+        return metric_info_artifact,df_scores
         
     except Exception as e:
         raise ThyroidException(e, sys) from e
