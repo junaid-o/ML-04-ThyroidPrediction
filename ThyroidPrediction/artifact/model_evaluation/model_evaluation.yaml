@@ -1,5 +1,5 @@
 best_model:
-  model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-25-22-34-45\trained_model\model.pkl
+  model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-26-16-31-37\trained_model\model.pkl
 history:
   2023-04-25-16-54-04:
     model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-25-16-54-04\trained_model\model.pkl
@@ -13,3 +13,13 @@ history:
     model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-25-21-46-26\trained_model\model.pkl
   2023-04-25-22-34-45:
     model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-25-22-12-01\trained_model\model.pkl
+  2023-04-26-15-13-29:
+    model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-25-22-34-45\trained_model\model.pkl
+  2023-04-26-15-46-36:
+    model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-26-15-13-29\trained_model\model.pkl
+  2023-04-26-16-04-32:
+    model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-26-15-46-36\trained_model\model.pkl
+  2023-04-26-16-17-51:
+    model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-26-16-04-32\trained_model\model.pkl
+  2023-04-26-16-31-37:
+    model_path: C:\Users\HIMANSHU\Desktop\ML-04-ThyroidPrediction\ThyroidPrediction\artifact\model_trainer\2023-04-26-16-17-51\trained_model\model.pkl

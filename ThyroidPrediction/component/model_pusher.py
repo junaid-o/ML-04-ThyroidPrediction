@@ -34,6 +34,7 @@ class ModelPusher:
 
             ################### PATH PREPARATION FOR SCORE.CSV FILE COPYING INTO SAVED_MODEL FOLDER ##########
             head, _ = os.path.split(evaluated_model_file_path)
+            head, _ = os.path.split(head)
             score_file_path_source = os.path.join(head,"score", "model_score.csv")
             export_score_dir = os.path.join(export_dir, "score")
             os.makedirs(export_score_dir, exist_ok=True)
@@ -52,6 +53,7 @@ class ModelPusher:
             shutil.copy(src=evaluated_model_file_path, dst=export_model_file_path)
 
             shutil.copy(src=score_file_path_source, dst=score_file_path_destination)    # COPY Score file too
+            shutil.copy(src=score_file_path_source, dst=os.path.join(export_score_dir, "model_score.html"))    # COPY Score Plot file too
 
 
 

@@ -9,7 +9,7 @@ import yaml
 from pyexpat import model
 from cmath import log
 from typing import List
-from sklearn.metrics import balanced_accuracy_score, f1_score, r2_score,mean_squared_error
+from sklearn.metrics import balanced_accuracy_score, f1_score, r2_score,mean_squared_error, roc_auc_score
 
 from collections import namedtuple
 from ThyroidPrediction.logger import logging
@@ -70,13 +70,16 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
         balanced_accuracy_train = []
         balanced_accuracy_test = []
         balanced_accuracy_diff = []
-        models = []
+        Fowlke_Mallows_index = []
+        roc_auc_ovr_weighted_test_list = []
+        roc_auc_ovr_weighted_train_list= []
+        model_name_list = []
 
         index_number = 0
         metric_info_artifact = None
         for model in model_list:
             model_name = str(model)  #getting model name based on model object
-            models.append(model)
+            model_name_list.append(type(model).__name__)
 
             logging.info(f"{'>>'*30}Started evaluating model: [{type(model).__name__}] {'<<'*30}")
             
@@ -84,20 +87,27 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             y_train_pred = model.predict(X_train)
             y_test_pred = model.predict(X_test)
 
-            #Calculating r squared score on training and testing dataset
+            # Calculating F1_weighted score on training and testing dataset
             train_f1 = f1_score(y_train, y_train_pred, average="weighted")
             test_f1 = f1_score(y_test, y_test_pred, average="weighted")
 
             f1_train.append(train_f1)
             f1_test.append(test_f1)
 
-            #Calculating mean squared error on training and testing dataset
+            # Calculating roc_auc_ovr_weighted
+            roc_auc_ovr_weighted_train =  roc_auc_score(y_train, model.predict_proba(X_train), multi_class='ovr', average='weighted')
+            roc_auc_ovr_weighted_test =  roc_auc_score(y_test, model.predict_proba(X_test), multi_class='ovr', average='weighted')
+            roc_auc_ovr_weighted_train_list.append(roc_auc_ovr_weighted_train)
+            roc_auc_ovr_weighted_test_list.append(roc_auc_ovr_weighted_test)
+
+            # Calculating Balanced Accuracy on training and testing dataset
             train_balanced_accuracy_score = balanced_accuracy_score(y_train, y_train_pred)
             test_balanced_accuracy_score = balanced_accuracy_score(y_test, y_test_pred)
 
             balanced_accuracy_train.append(train_balanced_accuracy_score)
             balanced_accuracy_test.append(test_balanced_accuracy_score)
-
+            
+            ####################################################################################
             # Calculating harmonic mean of train_accuracy and test_accuracy
             # Fowlkes-Mallows index. It is a measure of similarity between two sets of clustering or classification results,
             #  where the two sets of results are compared against a reference (or ground truth) clustering or classification.
@@ -109,7 +119,7 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             diff_test_train_acc = abs(test_balanced_accuracy_score - train_balanced_accuracy_score)
 
             balanced_accuracy_diff.append(diff_test_train_acc)
-
+            Fowlke_Mallows_index.append(model_accuracy)
             ################################################################
 
             #logging all important metric
@@ -156,12 +166,15 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
 
         #################################################################
 
-        data = {"models": models,
-                "f1_train_weighted": f1_train,
-                "f1_test_weighted": f1_test,
+        data = {"models": model_name_list,
+                "f1_weighted_train": f1_train,
+                "f1_weighted_test": f1_test,
+                "roc_auc_ovr_weighted_train": roc_auc_ovr_weighted_train_list,
+                "roc_auc_ovr_weighted_test": roc_auc_ovr_weighted_test_list,
                 "balanced_accuracy_train": balanced_accuracy_train,
                 "balanced_accuracy_test": balanced_accuracy_test,
-                "balanced_accuracy_diff": balanced_accuracy_diff}
+                "balanced_accuracy_diff": balanced_accuracy_diff,
+                "Fowlke_Mallows_index": Fowlke_Mallows_index}
         df_scores = pd.DataFrame(data= data)
 
         #scores_path = os.makedirs(os.path.join(ModelTrainerConfig.trained_model_file_path, "scores"), exist_ok=True)

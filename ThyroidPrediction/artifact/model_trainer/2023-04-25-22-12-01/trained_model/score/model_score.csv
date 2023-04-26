@@ -1,3 +1,0 @@
-models,f1_train_weighted,f1_test_weighted,balanced_accuracy_train,balanced_accuracy_test,balanced_accuracy_diff
-"RandomForestClassifier(class_weight='balanced', max_depth=12, random_state=2023)",0.9443845728115571,0.7327558319001551,0.9457656612529002,0.5056943822640155,0.44007127898888465
-"KNeighborsClassifier(n_neighbors=9, weights='distance')",0.9455381301751342,0.5095486178494453,0.9469257540603249,0.10871167416492436,0.8382140798954005

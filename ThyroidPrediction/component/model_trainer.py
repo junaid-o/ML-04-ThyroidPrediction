@@ -1,5 +1,5 @@
 import os
-
+import plotly.graph_objects as go
 import pandas as pd
 from ThyroidPrediction.exception import ThyroidException
 import sys
@@ -33,6 +33,18 @@ class ThyroidEstimatorModel:
         #return self.trained_model_object.predict(transformed_feature)
 
         return self.trained_model_object.predict(X)
+
+    def predict_proba(self, X):
+        """
+        function accepts raw inputs and then transformed raw input using preprocessing_object
+        which gurantees that the inputs are in the same format as the training data
+        At last it perform prediction on transformed features
+        """
+        #transformed_feature = self.preprocessing_object.transform(X)
+        #return self.trained_model_object.predict(transformed_feature)
+
+        return self.trained_model_object.predict_proba(X)
+
 
     def __repr__(self):
         return f"{type(self.trained_model_object).__name__}()"
@@ -242,15 +254,139 @@ class ModelTrainer:
             
 
             save_object(file_path=trained_model_file_path, obj=thyroid_model)
+            
 
+            print("=========    MODEL_TRAINER: THYROID MODEL")
+            print(thyroid_model)
+            print("===="*5)
+            
             #################### Exporting SCORE CSV FILE ################
 
             head, tail= os.path.split(trained_model_file_path)
+
+            head, _ = os.path.split(head)
 
             model_scores_file_dir = os.path.join(head, "score")
             os.makedirs(model_scores_file_dir)
             model_scores_file_path = os.path.join(model_scores_file_dir, "model_score.csv")
             model_scores.to_csv(model_scores_file_path, index=False)
+            
+            ##################### EXPORTING PLOT OF SCORES #######################
+            df = model_scores
+            df = df.set_index('models')
+            print(df.head())
+            df1 = df[['f1_weighted_train','roc_auc_ovr_weighted_train','balanced_accuracy_train']]
+            df2 = df[['f1_weighted_test','roc_auc_ovr_weighted_test','balanced_accuracy_test','Fowlke_Mallows_index']]
+        
+
+            def multi_plot(df1,df2, title, addAll = True):
+                
+                fig = go.Figure()
+                
+
+                for column1 in df1.columns.to_list():
+                    f1= fig.add_trace(
+                        go.Bar(
+                            x = df1.index,
+                            y = df1[column1],
+                            name = column1,
+                        )
+                    )
+
+                for column2 in df2.columns.to_list():
+                    fig.add_trace(
+                        go.Bar(
+                            x = df2.index,
+                            y = df2[column2],
+                            name = column2
+                        )
+                    )
+
+
+                button_all = [dict(label = 'Train',
+                                method = 'update',
+                                args = [{'visible': df1.columns.isin(df1.columns),
+                                        'title': 'All',
+                                        'showlegend':True}]),
+                            dict(label = 'Select',
+                                method = 'update',
+                                args = [{'visible': df2.columns.isin(df2.columns),
+                                        'title': 'All',
+                                        'showlegend':True}]),
+                            
+                            ]
+                            
+                            
+
+                def create_layout_button(column1):
+                    return dict(label = column1,
+                                method = 'update',
+                                args = [{'visible': df1.columns.isin([column1]),
+                                        'title': column1,
+                                        'showlegend': True}])
+                
+                def create_layout_button2(column2):
+                    return dict(label = column2,
+                                method = 'update',
+                                args = [{'visible': df2.columns.isin([column2]),
+                                        'title': column2,
+                                        'showlegend': True}]
+                            )
+                # Update remaining layout properties
+
+                fig.update_layout(
+                    updatemenus=[
+                    
+                        
+                        go.layout.Updatemenu(
+                        active = 0,
+                        visible=True,
+                        buttons = ([button_all[1]] * addAll) + list(df2.columns.map(lambda column: create_layout_button2(column))),
+                        
+                        direction="right",
+                        pad={"r": 5, "t": 5,"l":5},
+                        showactive=True,
+                        x=-0.03,
+                        xanchor="left",
+                        y=1.1,
+                        yanchor="bottom"),
+                        
+                        
+                        
+                    ],
+                    yaxis_type="log"       
+                )
+                # Update remaining layout properties
+                fig.update_layout(
+                    title_text=title,
+                    title_y=0.96,
+                    
+                    height=400,
+                    #width = 1000,
+                    showlegend=True,
+                    legend=dict(yanchor="bottom",
+                                            y=-0.5,
+                                            xanchor="center",
+                                            x=0.5,
+                                            orientation='h'),
+                    paper_bgcolor = "rgba(0,0,0,0)",
+                    plot_bgcolor = "rgba(0,0,0,0)",
+                    margin_autoexpand=True,
+                    autosize=True,
+                    
+                )
+                
+                #fig.show(scale=200, config= dict(displayModeBar = False))
+                
+                ############################################################
+                
+                # Writing and exporting interactive figure as html file 
+                model_scores_html_path = os.path.join(model_scores_file_dir, "model_score.html")
+                f1.write_html(model_scores_html_path, full_html=False, config= dict(displayModeBar = False))
+
+            multi_plot(df1,df2, title="Model Scores: Oversampled Data With Major Classes Tested On Original Data")
+
+
             #####################################################################
 
             #model_trainer_artifact=  ModelTrainerArtifact(is_trained=True,message="Model Trained successfully",
