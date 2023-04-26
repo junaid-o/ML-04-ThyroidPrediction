@@ -275,8 +275,8 @@ class ModelTrainer:
             df = model_scores
             df = df.set_index('models')
             print(df.head())
-            df1 = df[['f1_weighted_train','roc_auc_ovr_weighted_train','balanced_accuracy_train']]
-            df2 = df[['f1_weighted_test','roc_auc_ovr_weighted_test','balanced_accuracy_test','Fowlke_Mallows_index']]
+            df1 = df[['f1_weighted_train','roc_auc_ovr_weighted_train','balanced_accuracy_train',"log_loss_train"]]
+            df2 = df[['f1_weighted_test','roc_auc_ovr_weighted_test','balanced_accuracy_test','log_loss_test']]
         
 
             def multi_plot(df1,df2, title, addAll = True):

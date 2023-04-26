@@ -9,7 +9,7 @@ import yaml
 from pyexpat import model
 from cmath import log
 from typing import List
-from sklearn.metrics import balanced_accuracy_score, f1_score, r2_score,mean_squared_error, roc_auc_score
+from sklearn.metrics import balanced_accuracy_score, f1_score, r2_score,mean_squared_error, roc_auc_score, log_loss
 
 from collections import namedtuple
 from ThyroidPrediction.logger import logging
@@ -70,7 +70,8 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
         balanced_accuracy_train = []
         balanced_accuracy_test = []
         balanced_accuracy_diff = []
-        Fowlke_Mallows_index = []
+        log_loss_list_train = []
+        log_loss_list_test = []
         roc_auc_ovr_weighted_test_list = []
         roc_auc_ovr_weighted_train_list= []
         model_name_list = []
@@ -116,10 +117,22 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             #  The Fowlkes-Mallows index is a weighted harmonic mean of precision and recall.
 
             model_accuracy = (2 * (train_balanced_accuracy_score * test_balanced_accuracy_score)) / (train_balanced_accuracy_score + test_balanced_accuracy_score)
+            
             diff_test_train_acc = abs(test_balanced_accuracy_score - train_balanced_accuracy_score)
-
             balanced_accuracy_diff.append(diff_test_train_acc)
-            Fowlke_Mallows_index.append(model_accuracy)
+
+
+            loss_train = log_loss(y_train, model.predict_proba(X_train))
+            loss_test = log_loss(y_test, model.predict_proba(X_test))
+            log_loss_list_test.append(loss_test)
+            log_loss_list_train.append(loss_train)            
+
+
+            print("============ MODEL Factory:LOG LOSS=========="*2)
+            print(log_loss)
+            print("================================"*2)
+            
+            
             ################################################################
 
             #logging all important metric
@@ -174,7 +187,8 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
                 "balanced_accuracy_train": balanced_accuracy_train,
                 "balanced_accuracy_test": balanced_accuracy_test,
                 "balanced_accuracy_diff": balanced_accuracy_diff,
-                "Fowlke_Mallows_index": Fowlke_Mallows_index}
+                "log_loss_train": log_loss_list_train,
+                "log_loss_test": log_loss_list_test}
         df_scores = pd.DataFrame(data= data)
 
         #scores_path = os.makedirs(os.path.join(ModelTrainerConfig.trained_model_file_path, "scores"), exist_ok=True)

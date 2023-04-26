@@ -1,8 +1,10 @@
+from ast import mod
 from email import message
 from ipaddress import collapse_addresses
 from re import S
 from numpy import dtype
 import pandas as pd
+from sklearn.metrics import f1_score
 from ThyroidPrediction.logger import get_log_dataframe
 from flask import Flask, request
 import sys
@@ -80,7 +82,35 @@ def render_artifact_dir(req_path):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:
-        return render_template('index.html')
+        #print(MODEL_DIR)
+        #print(ThyroidPredictor(MODEL_DIR).get_latest_model_path())
+        latest_model_dir = ThyroidPredictor(MODEL_DIR).get_latest_model_path()
+        head, _ = os.path.split(latest_model_dir)
+        model_score_file_dir = os.path.join(head, "score")
+        os.makedirs(model_score_file_dir, exist_ok=True)
+        
+        print(model_score_file_dir)
+        
+        model_scores = pd.read_csv(os.path.join(model_score_file_dir,"model_score.csv"))
+        model_scores.set_index("models",drop=True, inplace=True)
+        print(model_scores.columns)
+        
+        f1_score_train = round(model_scores.loc["RandomForestClassifier","f1_weighted_train"], 3)
+        f1_score_test = round(model_scores.loc["RandomForestClassifier","f1_weighted_test"], 3)
+        #print(f1_score_train)
+        
+        roc_auc_ovr_weighted_train = round(model_scores.loc["RandomForestClassifier","roc_auc_ovr_weighted_train"], 3)
+        roc_auc_ovr_weighted_test = round(model_scores.loc["RandomForestClassifier","roc_auc_ovr_weighted_test"], 3)        
+
+        balanced_accuracy_train = round(model_scores.loc["RandomForestClassifier","balanced_accuracy_train"], 3)
+        balanced_accuracy_test = round(model_scores.loc["RandomForestClassifier","balanced_accuracy_test"], 3)
+
+        log_loss_train = round(model_scores.loc["RandomForestClassifier","log_loss_train"], 3)
+        log_loss_test = round(model_scores.loc["RandomForestClassifier","log_loss_test"], 3)
+        
+
+        return render_template('index.html', f1_score_train = f1_score_train, f1_score_test= f1_score_test, roc_auc_ovr_weighted_test = roc_auc_ovr_weighted_test, roc_auc_ovr_weighted_train = roc_auc_ovr_weighted_train, balanced_accuracy_test=balanced_accuracy_test, balanced_accuracy_train= balanced_accuracy_train, log_loss_test= log_loss_test, log_loss_train= log_loss_train)
+    
     except Exception as e:
         return str(e)
 

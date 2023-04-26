@@ -121,7 +121,8 @@
                         <h6>F1</h6>
 
                         <div class="content">
-                            <h1>8.98</h1>
+                            <h1>{{ f1_score_test | safe }}</h1>
+                            <h6 style="text-align: right;">{{ f1_score_train | safe }}</h6>
 
                         </div>
                     </div>
@@ -133,7 +134,8 @@
                         <h6>ROC AUC</h6>
 
                         <div class="content">
-                            <h1>0.989</h1>
+                            <h1>{{ roc_auc_ovr_weighted_test | safe}}</h1>
+                            <h6 style="text-align: right;">{{ roc_auc_ovr_weighted_train | safe}}</h6>
 
                         </div>
                     </div>
@@ -145,7 +147,8 @@
                         <h6>Accuracy</h6>
 
                         <div class="content">
-                            <h1>0.86</h1>
+                            <h1>{{ balanced_accuracy_test}}</h1>
+                            <h6 style="text-align: right;">{{ balanced_accuracy_train | safe}}</h6>
 
                         </div>
                     </div>
@@ -155,10 +158,11 @@
             <div class="col-sm-3 col-md-4 col-lg-3">
                 <div class="cardBox">
                     <div class="card" id="animated-card">
-                        <h6>Precision</h6>
+                        <h6>Log loss</h6>
 
                         <div class="content">
-                            <h1>0.876</h1>
+                            <h1>{{ log_loss_test | safe}}</h1>
+                            <h6 style="text-align: right;">{{ log_loss_train | safe}}</h6>
 
                         </div>
                     </div>
