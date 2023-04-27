@@ -12,7 +12,7 @@
     "notebook.output.scrolling": true,
     "notebook.output.textLineLimit": 30,
     "editor.mouseWheelZoom": true,
-    "window.zoomLevel": -1,
+    "window.zoomLevel": -2,
     "[python]": {
         "editor.defaultFormatter": "ms-python.python"
     },

@@ -5,7 +5,7 @@ grid_search:
     cv: 2
     verbose: 3
     refit: roc_auc_ovr_weighted
-    scoring: [f1_weighted, roc_auc_ovr_weighted, balanced_accuracy]
+    scoring: [f1_weighted, roc_auc_ovr_weighted, balanced_accuracy, neg_log_loss]
 
 model_selection:
   module_1:

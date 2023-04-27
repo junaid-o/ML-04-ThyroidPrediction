@@ -3,6 +3,7 @@ import uuid
 import pandas as pd
 from multiprocessing import Process
 from ThyroidPrediction.component.model_evaluation import ModelEvaluation
+from ThyroidPrediction.component.model_performance import ModelPerformance
 from ThyroidPrediction.component.model_pusher import ModelPusher
 from ThyroidPrediction.component.model_trainer import ModelTrainer
 from ThyroidPrediction.entity.experiment import Experiment
@@ -115,6 +116,18 @@ class Pipeline(Thread):
             return model_eval.initiate_model_evaluation()
         except Exception as e:
             raise ThyroidException(e, sys) from e
+        
+
+    def start_model_performance_evaluation(self, data_transformation_artifact: BaseDataTransformationArtifact, data_validation_artifact: DataValidationArtifact, model_trainer_artifact: ClassModelTrainerArtifact):
+        try:
+            model_performance = ModelPerformance(model_evaluation_config=self.config.get_model_evaluation_config(),
+                                         data_transformation_artifact=data_transformation_artifact,
+                                         data_validation_artifact=data_validation_artifact,
+                                         model_trainer_artifact=model_trainer_artifact)
+
+            return model_performance.initiate_performance_evaluation()
+        except Exception as e:
+            raise ThyroidException(e, sys) from e        
 
     def start_model_pusher(self, model_eval_artifact: ModelEvaluationArtifact) -> ModelPusherArtifact:
         try:
@@ -166,9 +179,16 @@ class Pipeline(Thread):
             
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
 
+
+
             model_evaluation_artifact = self.start_model_evaluation(data_transformation_artifact=data_transformation_artifact,
                                                                     data_validation_artifact=data_validation_artifact,
                                                                     model_trainer_artifact=model_trainer_artifact)
+
+            model_performance_artifact = self.start_model_performance_evaluation(data_transformation_artifact=data_transformation_artifact,
+                                                                                data_validation_artifact=data_validation_artifact,
+                                                                                model_trainer_artifact=model_trainer_artifact)
+            
 
             if model_evaluation_artifact.is_model_accepted:
 
