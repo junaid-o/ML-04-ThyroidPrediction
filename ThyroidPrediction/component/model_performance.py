@@ -1,3 +1,6 @@
+import shutil
+from statistics import mode
+import natsort
 from sklearn.metrics import ConfusionMatrixDisplay
 from ThyroidPrediction.logger import logging
 from ThyroidPrediction.exception import ThyroidException
@@ -113,7 +116,7 @@ class ModelPerformance:
 
             #################################################
             fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), squeeze=True)
-            fig.suptitle('Confusion Metrix: Oversampled Data with Major Classes', fontsize=20, fontweight='bold', y=0.98)
+            fig.suptitle('Confusion Metrix: Oversampled Data with Major Classes', fontsize=18, fontweight='bold', y=0.98)
             # Uncomment the axes line if increasing column in above line of code
             try:
                 # flattening is required only when nrows or ncols is mor than one
@@ -211,8 +214,8 @@ class ModelPerformance:
             X_train, _, y_train, _, RF_model = self.get_trained_model_and_data()
             ############## LEARNING CURVE: Subplot Canvas #####################
 
-            fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), squeeze=True)
-            fig.suptitle('Learning Curve: Resampled Data With Major Class', fontsize=20, fontweight='bold', y=1.0)
+            fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(5, 5), squeeze=True)
+            fig.suptitle('Learning Curve', fontsize=16, fontweight='bold', y=1.0)
             
             try:
                 # Needed Only when more than 1 columns or rows are need in above line of code
@@ -292,7 +295,7 @@ class ModelPerformance:
             X_train, _, y_train, _, RF_model = self.get_trained_model_and_data()
             #################################################
             fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(12, 4), squeeze=True)
-            fig.suptitle(' Scalability & Performance: Resampled Data With Major Class', fontsize=22, fontweight='bold', y=1.0)
+            fig.suptitle(' Scalability & Performance: Resampled Data With Major Class', fontsize=18, fontweight='bold', y=1.0)
             axes = axes.flatten()
             i = 0
             ###################################################
@@ -373,6 +376,66 @@ class ModelPerformance:
         except Exception as e:
             raise ThyroidException(e, sys) from e
         
+    def get_merged_performance_report(self):
+        try:
+
+                # Set the path to the directory containing the sufolders or HTML files
+                model_performance_dir = self.model_performance_dir
+
+                # Create a string to hold the HTML code
+                html_code = ''
+
+                # Loop through all directories and files in the directory tree
+
+                for root, dirs, files in os.walk(model_performance_dir):
+                    files = natsort.natsorted(files)
+                    
+                    print(files)    
+                    
+                    for file in files:
+                        # Check if the file is an HTML file
+                            ###########################################################
+                            
+                        if file.endswith('.html') or file.endswith('.svg'):
+                            #file_list.append(file)
+                            # Read the contents of the file
+                                
+                            with open(os.path.join(root, file), 'r', encoding="utf-8") as f:
+                                file_contents = f.read()
+
+                            # Add the contents of the file to the HTML code string
+                            html_code += file_contents
+                            ##########################################            
+
+                # Write the HTML code to a new file
+                with open(os.path.join(self.model_performance_dir, 'PerformanceReport.html'), 'a', encoding="utf-8") as f:
+                                
+                    f.write(html_code)
+                
+                ######################### CLEARING ALL FILES Other THAN ONE SPECIFID FILE ###########################
+                #shutil.rmtree(dir_path)    # Clear all the files and folder irrespective to that if they contain data or not
+
+                dir_path = self.model_performance_dir
+                except_file = 'PerformanceReport.html'
+
+                for file_name in os.listdir(dir_path):
+                    if file_name != except_file:
+                        os.remove(os.path.join(dir_path, file_name))                
+
+                ####################### COPYING PERFORMANCE REPORT TO TEMPLATE #######################################
+
+                src_dir = self.model_performance_dir                
+                dest_dir = os.path.join("templates")
+
+                # Construct the path to the most recent file
+                most_recent_file_path = os.path.join(src_dir, "PerformanceReport.html")
+
+                # Copy the most recent file to the destination directory
+                shutil.copy(most_recent_file_path, dest_dir)                              
+
+        except Exception as e:
+            raise ThyroidException(e, sys) from e
+
         
     def initiate_performance_evaluation(self):
         try:
@@ -380,6 +443,8 @@ class ModelPerformance:
             self.get_confusion_metrix()
             self.get_roc_auc_curve()
             self.get_learning_curve()
-            return self.get_scalability_performance()
+            self.get_scalability_performance()
+
+            return self.get_merged_performance_report()
         except Exception as e:
             raise ThyroidException(e, sys) from e

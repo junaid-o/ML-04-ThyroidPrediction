@@ -65,13 +65,13 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
     """
     try:
         
-        f1_train = []
-        f1_test = []
-        balanced_accuracy_train = []
-        balanced_accuracy_test = []
-        balanced_accuracy_diff = []
-        log_loss_list_train = []
-        log_loss_list_test = []
+        f1_train_list = []
+        f1_test_list = []
+        balanced_accuracy_train_list = []
+        balanced_accuracy_test_list = []
+        balanced_accuracy_diff_list = []
+        log_loss_train_list = []
+        log_loss_test_list = []
         roc_auc_ovr_weighted_test_list = []
         roc_auc_ovr_weighted_train_list= []
         model_name_list = []
@@ -92,8 +92,8 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             train_f1 = f1_score(y_train, y_train_pred, average="weighted")
             test_f1 = f1_score(y_test, y_test_pred, average="weighted")
 
-            f1_train.append(train_f1)
-            f1_test.append(test_f1)
+            f1_train_list.append(train_f1)
+            f1_test_list.append(test_f1)
 
             # Calculating roc_auc_ovr_weighted
             roc_auc_ovr_weighted_train =  roc_auc_score(y_train, model.predict_proba(X_train), multi_class='ovr', average='weighted')
@@ -105,8 +105,8 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             train_balanced_accuracy_score = balanced_accuracy_score(y_train, y_train_pred)
             test_balanced_accuracy_score = balanced_accuracy_score(y_test, y_test_pred)
 
-            balanced_accuracy_train.append(train_balanced_accuracy_score)
-            balanced_accuracy_test.append(test_balanced_accuracy_score)
+            balanced_accuracy_train_list.append(train_balanced_accuracy_score)
+            balanced_accuracy_test_list.append(test_balanced_accuracy_score)
             
             ####################################################################################
             # Calculating harmonic mean of train_accuracy and test_accuracy
@@ -119,13 +119,13 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
             model_accuracy = (2 * (train_balanced_accuracy_score * test_balanced_accuracy_score)) / (train_balanced_accuracy_score + test_balanced_accuracy_score)
             
             diff_test_train_acc = abs(test_balanced_accuracy_score - train_balanced_accuracy_score)
-            balanced_accuracy_diff.append(diff_test_train_acc)
+            balanced_accuracy_diff_list.append(diff_test_train_acc)
 
 
             loss_train = log_loss(y_train, model.predict_proba(X_train))
             loss_test = log_loss(y_test, model.predict_proba(X_test))
-            log_loss_list_test.append(loss_test)
-            log_loss_list_train.append(loss_train)            
+            log_loss_test_list.append(loss_test)
+            log_loss_train_list.append(loss_train)            
 
 
             print("============ MODEL Factory:LOG LOSS=========="*2)
@@ -147,7 +147,12 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
 
             #if model accuracy is greater than base accuracy and train and test score is within certain thershold
             #we will accept that model as accepted model
+
             logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
+            
+            #f1_logic = (train_f1 >= 0.91) and  abs(train_f1 - test_f1) <= 0.03
+            #roc_auc_logic = (roc_auc_ovr_weighted_train >= 0.98) and abs(roc_auc_ovr_weighted_train - roc_auc_ovr_weighted_test) <= 0.02
+
             if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
             
                 #base_accuracy = model_accuracy
@@ -180,15 +185,15 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
         #################################################################
 
         data = {"models": model_name_list,
-                "f1_weighted_train": f1_train,
-                "f1_weighted_test": f1_test,
+                "f1_weighted_train": f1_train_list,
+                "f1_weighted_test": f1_test_list,
                 "roc_auc_ovr_weighted_train": roc_auc_ovr_weighted_train_list,
                 "roc_auc_ovr_weighted_test": roc_auc_ovr_weighted_test_list,
-                "balanced_accuracy_train": balanced_accuracy_train,
-                "balanced_accuracy_test": balanced_accuracy_test,
-                "balanced_accuracy_diff": balanced_accuracy_diff,
-                "log_loss_train": log_loss_list_train,
-                "log_loss_test": log_loss_list_test}
+                "balanced_accuracy_train": balanced_accuracy_train_list,
+                "balanced_accuracy_test": balanced_accuracy_test_list,
+                "balanced_accuracy_diff": balanced_accuracy_diff_list,
+                "log_loss_train": log_loss_train_list,
+                "log_loss_test": log_loss_test_list}
         df_scores = pd.DataFrame(data= data)
 
         #scores_path = os.makedirs(os.path.join(ModelTrainerConfig.trained_model_file_path, "scores"), exist_ok=True)

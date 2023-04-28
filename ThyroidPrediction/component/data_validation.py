@@ -305,7 +305,7 @@ class DataValidation:
             
             report.save_html(filename= report_page_file_path)
             
-            ##################  COPYING DRIFT REPORT TO TMPLATS FOLDER  #########################
+            ##################  COPYING DRIFT REPORT TO TEMPLATES FOLDER  #########################
 
             def get_copy_of_drift_report():
                 try:

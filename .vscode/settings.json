@@ -3,8 +3,8 @@
     "workbench.colorCustomizations": {
     //    "editor.background": "#272822",
     //     "editor.background": "#1b1c17",
-    //       "editor.background": "#000000",
-    //        "editorGutter.background": "#000000",
+           "editor.background": "#000000",
+            "editorGutter.background": "#000000",
     
     
     },
