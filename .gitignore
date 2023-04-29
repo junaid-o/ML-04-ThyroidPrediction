@@ -112,7 +112,7 @@ env.bak/
 venv.bak/
 
 # secret.py
-.ThyroidPrdiction/secrets/secret.py
+ThyroidPrdiction/secrets/secret.py
 secret.py
 
 # Spyder project settings
