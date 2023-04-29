@@ -1,8 +1,8 @@
 import shutil
 from sqlite3 import Timestamp
 
+from ThyroidPrediction.constant import CURRENT_TIME_STAMP, get_current_time_stamp
 
-from ThyroidPrediction.constant import get_current_time_stamp
 from ThyroidPrediction.entity.config_entity import DataIngestionConfig, BaseDataIngestionConfig
 from ThyroidPrediction.exception import ThyroidException
 from ThyroidPrediction.logger import logging
@@ -35,6 +35,8 @@ import ydata_profiling
 from ydata_profiling import ProfileReport
 from ydata_profiling.config import Settings
 import matplotlib.pyplot as plt
+import boto3
+from ThyroidPrediction.secrets.secret import AWS_S3_ACCESS_KEY_ID, AWS_S3_SECRET_ACCESS_KEY, AWS_REGION, AWS_BUCKET_NAME, AWS_FOLDER_NAME
 
 
 #class DataIngestion:
@@ -161,6 +163,8 @@ import matplotlib.pyplot as plt
     #       raise ThyroidException(e, sys) from e
         
 
+
+
 class DataIngestion:
 
     def __init__(self, data_ingestion_config:BaseDataIngestionConfig):
@@ -169,17 +173,69 @@ class DataIngestion:
             logging.info(f"{'='*20} DATA INGESTION LOG STARTED.{'='*20}")
             
             #self.data_ingestion_config = data_ingestion_config
+            self.current_time_stamp = CURRENT_TIME_STAMP
             self.base_data_ingestion_config = data_ingestion_config
             self.base_dataset_path = r"ThyroidPrediction\dataset_base"
 
-            self.profiling_dir_part_1 = os.path.join("ThyroidPrediction\\artifact", "Profiling", get_current_time_stamp(), "Part_1")
+            self.dataset_s3_bucket_download_dir = os.path.join("ThyroidPrediction","s3_bucket", self.current_time_stamp)
+
+            self.profiling_dir_part_1 = os.path.join("ThyroidPrediction\\artifact", "Profiling", self.current_time_stamp, "Part_1")
             os.makedirs(self.profiling_dir_part_1, exist_ok=True)
 
-            self.profiling_dir_part_2 = os.path.join("ThyroidPrediction\\artifact", "Profiling", get_current_time_stamp(), "Part_2")
+            self.profiling_dir_part_2 = os.path.join("ThyroidPrediction\\artifact", "Profiling", self.current_time_stamp, "Part_2")
             os.makedirs(self.profiling_dir_part_2, exist_ok=True)            
 
         except Exception as e:
             raise ThyroidException(e, sys) from e
+        
+    def download_s3_bucket_data(self):
+        try:
+            logging.info(f"{'='*20} S3 BUCKET DATA INGESTION LOG STARTED.{'='*20}")
+
+            #import boto3
+            #import os
+            
+
+            # Set up the S3 client
+
+            logging.info(f" Creating s3 client")
+            s3 = boto3.client('s3', aws_access_key_id= AWS_S3_ACCESS_KEY_ID,
+                              aws_secret_access_key= AWS_S3_SECRET_ACCESS_KEY,
+                              region_name= AWS_REGION)
+
+            # Define the bucket and folder name
+            bucket_name = AWS_BUCKET_NAME
+            folder_name = AWS_FOLDER_NAME
+
+            # List all the objects in the folder
+
+            logging.info(f"Getting list of objcts in s3 bucket")
+            objects = s3.list_objects(Bucket= bucket_name, Prefix= folder_name)['Contents']
+
+            # Loop through each object and download it
+            for obj in objects:
+
+                # Create the local file path
+
+                print("======= OBJECT KEY IN S3 BUCKET ==="*2)
+                print(obj["Key"])
+                print("===================================="*2)
+                
+                head, tail =  os.path.split(obj['Key'])
+                
+                s3_download_dir = os.path.join(self.dataset_s3_bucket_download_dir, head)    
+                os.makedirs(s3_download_dir, exist_ok=True)
+                
+                s3_download_file_path = os.path.join(s3_download_dir, tail)
+                
+                # Download the file
+                logging.info(f"Downloading object: [ {tail} ] in path [ {s3_download_file_path} ]")
+                s3.download_file(bucket_name, obj['Key'], s3_download_file_path)
+
+        except Exception as e:
+            raise ThyroidException(e, sys) from e
+            
+            
         
 
     def get_base_data(self):
@@ -188,14 +244,47 @@ class DataIngestion:
 
             # Path to the top-level directory
             #dir_path = "ThyroidPrediction/dataset_base/Raw_Dataset"
+            try:
+                s3_bucket_download_dir, _ = os.path.split(self.dataset_s3_bucket_download_dir)
+                #s3_bucket_download_dir = s3_bucket_download_dir
 
-            dataset_base = self.base_dataset_path
-            raw_data_dir = self.base_data_ingestion_config.raw_data_dir
-            #print('=='*20)
-            #print(raw_data_dir)
-            #print('=='*20)
+                print("============ S3 Bucket Download Dir====="*3)
+                print(s3_bucket_download_dir)
+            except:
+                pass
+
+
+            def is_dir_empty(path):
+                if not os.path.isdir(path):
+                    return False
+                for dirpath, dirnames, filenames in os.walk(path):
+                    if dirnames or filenames:
+                        return False
+                return True
             
-            raw_data_dir_path = os.path.join(dataset_base, raw_data_dir)
+            print(f"=========== s3 bucket is empty: {is_dir_empty(s3_bucket_download_dir)}")
+
+            print("====================================================================")
+
+            try:
+                if not is_dir_empty(s3_bucket_download_dir):
+                    print("DIR NOT EMPTY")
+
+                    ordered_dir_list = natsort.natsorted(os.listdir(s3_bucket_download_dir))
+                    most_recent_dir = ordered_dir_list[-1]
+
+                    raw_data_dir = self.base_data_ingestion_config.raw_data_dir
+                    raw_data_dir_path = os.path.join(s3_bucket_download_dir, most_recent_dir, raw_data_dir)
+                    print("=============== DATA FETCHING FROM S3 BUCKET ==================")
+            except:
+                print("=============== DATA FETCHING FROM LOCAL_DATASET_BASE  ==================")
+                dataset_base = self.base_dataset_path
+                raw_data_dir = self.base_data_ingestion_config.raw_data_dir
+                raw_data_dir_path = os.path.join(dataset_base, raw_data_dir)
+
+            #dataset_base = self.base_dataset_path
+            #raw_data_dir = self.base_data_ingestion_config.raw_data_dir
+            #raw_data_dir_path = os.path.join(dataset_base, raw_data_dir)
             
             print('=== raw_data_dir_path =='*20)
             print("\n\n",raw_data_dir_path)
@@ -280,6 +369,7 @@ class DataIngestion:
             #processed_dataset_dir = os.path.join(self.base_dataset_path,"Processed_Dataset","Cleaned_Data")
             #os.makedirs(processed_dataset_dir, exist_ok=True)
 
+            ################## EXPORT PROCESSED FILE ################
             
             logging.info(f"Exporting Combined and semi-Cleaned Data to path: [{os.path.join(self.base_dataset_path,self.base_data_ingestion_config.processed_data_dir,self.base_data_ingestion_config.cleaned_data_dir)}]")
 
@@ -1109,9 +1199,7 @@ class DataIngestion:
         get_profile_report_1()
         get_profile_report_2()
         
-        
-
-
+       
     def split_data(self):
         try:
             
@@ -1190,7 +1278,11 @@ class DataIngestion:
        try:
            #tgz_file_path = self.download_housing_data()
            #self.extract_tgz_file(tgz_file_path=tgz_file_path)
-           
+           try:
+               self.download_s3_bucket_data()
+           except:              
+               pass
+
            self.get_base_data()
            self.get_data_transformer_object()
            self.outliers_handling()

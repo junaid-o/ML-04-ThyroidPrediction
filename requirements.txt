@@ -13,3 +13,4 @@ imbalanced-learn
 gunicorn
 natsort
 ydata-profiling
+boto3

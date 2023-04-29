@@ -119,7 +119,7 @@ Run pip install -r requirements.txt
         -   model_trainer.py
 
 
-
+# Check AWS S3 Bucket and AZURE before terminating the service
 
 # PROJECT TREE
 
