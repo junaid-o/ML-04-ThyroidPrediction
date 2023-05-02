@@ -38,6 +38,7 @@ Thyroid function is affected by an underlying medical condition.
 Results of thyroid tests are inconsistent or do not match clinical symptoms.
 
 
+
 | Grouped Category | Target Variables |
 | ---------------- | ---------------- |
 | Negative         | negative         |
@@ -65,9 +66,9 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 
 ## **Tools & Techniques**
 
-*   Data versioning using ttime stamp
+*   Data versioning using time stamp
 *   Code versioning using Git
-*   Modular coding with separate file for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration etc
+*   Modular coding with separate files for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration etc
 *   CI / CD using GitHub Actions
 *   S3 Bucket for storage of dataset.
 *   Docker
@@ -99,6 +100,7 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 *   Log loss
 *   ConfusionMetrics
 
+
 ## **Approach**
 
 *   Data collection, cleaning, missing value handling, outlier handling, Data Profiling, exploration.
@@ -109,7 +111,7 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 
 *   Tested Machine Learning algorithms, including `RandomForestClassifier`, `KNeighborsClassifier`, `AdaBoost` and `GradientBoostingClassifir`.
 
-*   Once the training is completd, model is passed through evaluation phase where it has to pass through set of logical conditons. Only the models above the threshold value of evaluation metrics are consider as acceptd model and pushed for integration with FlaskApp
+*   Once the training is completd, model is passed through evaluation phase where it has to pass through set of logical conditons. Only the models above the threshold value of evaluation metrics are consider as accepted model and pushed for integration with FlaskApp
 
 ```
 f1_logic = (train_f1 >= 0.738) and abs(train_f1 - test_f1) <= 0.009
@@ -214,12 +216,12 @@ To build and run this project using Docker, follow these steps:
     docker run -p 5000:5000 -e PORT=5000 <Image-ID>
     ```
 
-6.  Open a web browser and go to http://localhost:<host-port> to see the application running.
+6.  Open a web browser and go to `http://localhost:<host-port>` to see the application running.
 
 7.  Check Running Containers in docker
 
     ```
-    docke ps
+    docker ps
     ```
 
 8.  Stop Docker Container
