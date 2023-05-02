@@ -116,7 +116,7 @@ class ModelPerformance:
 
             #################################################
             fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6, 6), squeeze=True)
-            fig.suptitle('Confusion Metrix: Oversampled Data with Major Classes', fontsize=18, fontweight='bold', y=0.98)
+            fig.suptitle('Confusion Metrix: Orignal Data with Major Classes', fontsize=18, fontweight='bold', y=0.98)
             # Uncomment the axes line if increasing column in above line of code
             try:
                 # flattening is required only when nrows or ncols is mor than one
@@ -191,7 +191,7 @@ class ModelPerformance:
             plt.ylim([0.0, 1.05])
             plt.xlabel('False Positive Rate')
             plt.ylabel('True Positive Rate')
-            plt.title('Receiver operating characteristic for multiclass')
+            plt.title('ROC Curve for Multiclass')
             plt.legend(loc="lower right")
 
 
@@ -245,11 +245,11 @@ class ModelPerformance:
             
                 # split dataset into training and test data
                 train_sizes, train_scores, test_scores, fit_time, score_time = learning_curve(clf, X_train, y_train,
-                                                                        cv=2,
+                                                                        cv=5,
                                                                         verbose=3,
                                                                         random_state= 2023,
                                                                         #scoring=scoring,
-                                                                        train_sizes=np.linspace(0.1, 1.0, 3),
+                                                                        train_sizes=np.linspace(0.1, 1.0, 5),
                                                                         return_times= True
                                                                     )
                 
@@ -295,7 +295,7 @@ class ModelPerformance:
             X_train, _, y_train, _, RF_model = self.get_trained_model_and_data()
             #################################################
             fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(12, 4), squeeze=True)
-            fig.suptitle(' Scalability & Performance: Resampled Data With Major Class', fontsize=18, fontweight='bold', y=1.0)
+            fig.suptitle('Scalability & Performance: Original Data With Major Class', fontsize=18, fontweight='bold', y=1.0)
             axes = axes.flatten()
             i = 0
             ###################################################
@@ -315,11 +315,11 @@ class ModelPerformance:
             
                 # split dataset into training and test data
                 train_sizes, train_scores, test_scores, fit_time, score_time = learning_curve(clf, X_train, y_train,
-                                                                        cv=2,
-                                                                        verbose=2,
+                                                                        cv=4,
+                                                                        verbose=3,
                                                                         random_state=100,
                                                                         #scoring=scoring,
-                                                                        train_sizes=np.linspace(0.1, 1.0, 3),
+                                                                        train_sizes=np.linspace(0.1, 1.0, 5),
                                                                     return_times=True)
                 
                 # calculate mean and standard deviation of training and test scores

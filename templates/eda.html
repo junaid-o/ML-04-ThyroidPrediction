@@ -100,6 +100,7 @@
 		<button class="tablinks" onclick="openTab(event, 'report1')">Profile 1</button>
 		<button class="tablinks" onclick="openTab(event, 'report2')">Profile 2</button>
 		<button class="tablinks" onclick="openTab(event, 'report3')">Drift Report</button>
+		<button class="tablinks" onclick="openTab(event, 'report4')">Performance Report</button>
 	</div>
 
 	<!-- Create the tab content -->
@@ -113,6 +114,10 @@
 
 	<div id="report3" class="tabcontent">
 		<embed src="{{ url_for('render_drift_report')}}" width="100%" height="800px"/>
+	</div>
+
+	<div id="report4" class="tabcontent">
+		<embed src="{{ url_for('render_performance_report')}}" width="100%" height="800px"/>
 	</div>
 
 	<!-- JavaScript to toggle between the tabs -->

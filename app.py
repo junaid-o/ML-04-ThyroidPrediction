@@ -143,6 +143,13 @@ def render_drift_report():
     except Exception as e:
         raise ThyroidException(e, sys) from e        
 
+@app.route('/reports_4', methods=['GET', 'POST'])
+def render_performance_report():
+    try:
+        return render_template("PerformanceReport.html")
+    except Exception as e:
+        raise ThyroidException(e, sys) from e        
+
 @app.route('/view_experiment_hist', methods=['GET', 'POST'])
 def view_experiment_history():
     logging.info(f"req_path: view_experiment_hist")

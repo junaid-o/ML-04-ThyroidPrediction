@@ -42,6 +42,8 @@ MetricInfoArtifact = namedtuple("MetricInfoArtifact",
                                  "train_balanced_accuracy", "test_balanced_accuracy",                                 
                                   "model_accuracy", "index_number"])
 
+
+
 def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy: float= "base_accuracy")->MetricInfoArtifact:
     """
     Description:
@@ -129,7 +131,8 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
 
 
             print("============ MODEL Factory:LOG LOSS=========="*2)
-            print(log_loss)
+            print("loss_train: ", loss_train)
+            print("loss_test: ", loss_test)
             print("================================"*2)
             
             
@@ -137,23 +140,27 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
 
             #logging all important metric
             logging.info(f"{'>>'*30} Score {'<<'*30}")
-            logging.info(f"Train F1_weighted\t\t Test F1_weighted\t\t Train Balanced Accuracy Score\t\t Test Balanced Accuracy Score\t\t Average Score")
-            logging.info(f"{train_f1}\t\t {test_f1}\t\t {train_balanced_accuracy_score}\t\t {test_balanced_accuracy_score}\t\t {model_accuracy}")
+            logging.info(f"Train F1_weighted\t\t Test F1_weighted\t\t   roc_auc_ovr_weighted_train    \t\t roc_auc_ovr_weighted_train \t\t Train Balanced Accuracy Score\t\t Test Balanced Accuracy Score\t\t Average Score")
+            logging.info(f"{train_f1}\t\t {test_f1}\t\t {roc_auc_ovr_weighted_train}\t\t {roc_auc_ovr_weighted_test}\t\t\t {train_balanced_accuracy_score}\t\t {test_balanced_accuracy_score} \t\t\t {model_accuracy}")
 
             logging.info(f"{'>>'*30} Loss {'<<'*30}")
-            logging.info(f"Diff test train accuracy: [{diff_test_train_acc}].") 
+            logging.info(f"Diff test train accuracy: [{diff_test_train_acc}].")
+            logging.info(f"Log Loss Train: [{loss_train}].")
+            logging.info(f"Log Loss Test: [{loss_test}].")
             
-
 
             #if model accuracy is greater than base accuracy and train and test score is within certain thershold
             #we will accept that model as accepted model
 
-            logging.info(f"model_accuracy: {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
+            logging.info(f"train balanced accuracy: {train_balanced_accuracy_score} and model_accuracy(average): {model_accuracy} and base_accuracy: {base_accuracy} and diff_test_train_accuracy{diff_test_train_acc}")
             
-            #f1_logic = (train_f1 >= 0.91) and  abs(train_f1 - test_f1) <= 0.03
-            #roc_auc_logic = (roc_auc_ovr_weighted_train >= 0.98) and abs(roc_auc_ovr_weighted_train - roc_auc_ovr_weighted_test) <= 0.02
-
-            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
+            f1_logic = (train_f1 >= 0.738) and abs(train_f1 - test_f1) <= 0.009
+            roc_auc_logic = (roc_auc_ovr_weighted_train >= 0.89) and abs(roc_auc_ovr_weighted_train - roc_auc_ovr_weighted_test) <= 0.02
+            model_accuracy_logic = (train_balanced_accuracy_score >= base_accuracy) and diff_test_train_acc <= 0.04
+            loss_logic = (loss_train <= 1.013) and abs(loss_train - loss_test) <= 0.04
+            
+            #if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
+            if f1_logic and roc_auc_logic and model_accuracy_logic and loss_logic:
             
                 #base_accuracy = model_accuracy
                 
@@ -202,90 +209,6 @@ def evaluate_classification_model(model_list: list, X_train:np.ndarray, y_train:
 
 
         return metric_info_artifact,df_scores
-        
-    except Exception as e:
-        raise ThyroidException(e, sys) from e
-    
-
-
-def evaluate_regression_model(model_list: list, X_train:np.ndarray, y_train:np.ndarray, X_test:np.ndarray, y_test:np.ndarray, base_accuracy:float=0.01) -> MetricInfoArtifact:
-    """
-    Description:
-    This function compare multiple regression model return best model
-
-    Params:
-    model_list: List of model
-    X_train: Training dataset input feature
-    y_train: Training dataset target feature
-    X_test: Testing dataset input feature
-    y_test: Testing dataset input feature
-
-    return
-    It retured a named tuple
-    
-    MetricInfoArtifact = namedtuple("MetricInfo",
-                                ["model_name", "model_object", "train_rmse", "test_rmse", "train_accuracy",
-                                 "test_accuracy", "model_accuracy", "index_number"])
-
-    """
-    try:
-        
-    
-        index_number = 0
-        metric_info_artifact = None
-        for model in model_list:
-            model_name = str(model)  #getting model name based on model object
-
-            logging.info(f"{'>>'*30}Started evaluating model: [{type(model).__name__}] {'<<'*30}")
-            
-            #Getting prediction for training and testing dataset
-            y_train_pred = model.predict(X_train)
-            y_test_pred = model.predict(X_test)
-
-            #Calculating r squared score on training and testing dataset
-            train_acc = r2_score(y_train, y_train_pred)
-            test_acc = r2_score(y_test, y_test_pred)
-            
-            #Calculating mean squared error on training and testing dataset
-            train_rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
-            test_rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
-
-            # Calculating harmonic mean of train_accuracy and test_accuracy
-            model_accuracy = (2 * (train_acc * test_acc)) / (train_acc + test_acc)
-            diff_test_train_acc = abs(test_acc - train_acc)
-            
-            #logging all important metric
-            logging.info(f"{'>>'*30} Score {'<<'*30}")
-            logging.info(f"Train Score\t\t Test Score\t\t Average Score")
-            logging.info(f"{train_acc}\t\t {test_acc}\t\t{model_accuracy}")
-
-            logging.info(f"{'>>'*30} Loss {'<<'*30}")
-            logging.info(f"Diff test train accuracy: [{diff_test_train_acc}].") 
-            logging.info(f"Train root mean squared error: [{train_rmse}].")
-            logging.info(f"Test root mean squared error: [{test_rmse}].")
-
-
-            #if model accuracy is greater than base accuracy and train and test score is within certain thershold
-            #we will accept that model as accepted model
-            if model_accuracy >= base_accuracy and diff_test_train_acc < 0.5:
-                base_accuracy = model_accuracy
-                metric_info_artifact = MetricInfoArtifact(model_name=model_name,
-                                                          model_object=model,
-                                                          train_rmse=train_rmse,
-                                                          test_rmse=test_rmse,
-                                                          train_accuracy=train_acc,
-                                                          test_accuracy=test_acc,
-                                                          model_accuracy=model_accuracy,
-                                                          index_number=index_number)
-
-                logging.info(f"Acceptable model found {metric_info_artifact}. ")
-
-            index_number += 1            
-        if metric_info_artifact is None:
-
-            logging.info(f"No model found with higher accuracy than base accuracy")
-
-        return metric_info_artifact
         
     except Exception as e:
         raise ThyroidException(e, sys) from e
@@ -411,6 +334,7 @@ class ModelFactory:
             logging.info(message)
 
             grid_search_cv.fit(input_feature, output_feature)
+
             message = f'{">>"* 30} f"Training {type(initialized_model.model).__name__}" completed {"<<"*30}'
             grid_searched_best_model = GridSearchedBestModel(model_serial_number=initialized_model.model_serial_number,
                                                              model=initialized_model.model,
@@ -526,7 +450,7 @@ class ModelFactory:
         except Exception as e:
             raise ThyroidException(e, sys) from e
 
-    def get_best_model(self, X, y,base_accuracy=0.01) -> BestModel:
+    def get_best_model(self, X, y, base_accuracy = "base_accuracy") -> BestModel:
 
         try:
             logging.info("Started Initializing model from config file")

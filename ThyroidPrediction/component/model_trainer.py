@@ -9,7 +9,7 @@ from ThyroidPrediction.entity.artifact_entity import BaseDataTransformationArtif
 from ThyroidPrediction.entity.config_entity import ModelTrainerConfig
 from ThyroidPrediction.util.util import load_numpy_array_data,save_object,load_object
 from ThyroidPrediction.entity.model_factory import MetricInfoArtifact, ModelFactory,GridSearchedBestModel
-from ThyroidPrediction.entity.model_factory import evaluate_regression_model, evaluate_classification_model
+from ThyroidPrediction.entity.model_factory import evaluate_classification_model
 
 
 
@@ -208,15 +208,15 @@ class ModelTrainer:
             print("============================================================="*2)  
 
             logging.info(f"Initiating operation model selection")
-            best_model = model_factory.get_best_model(X=x_train,y=y_train,base_accuracy=base_accuracy)
+            best_model = model_factory.get_best_model(X=x_train,y=y_train, base_accuracy=base_accuracy)
             
             logging.info(f"Best model found on training dataset: {best_model}")
             
             logging.info(f"Extracting trained model list.")
-            grid_searched_best_model_list:List[GridSearchedBestModel]= model_factory.grid_searched_best_model_list
+            grid_searched_best_model_list:List[GridSearchedBestModel] = model_factory.grid_searched_best_model_list
             
             model_list = [model.best_model for model in grid_searched_best_model_list ]
-            logging.info(f"Evaluation all trained model on training and testing dataset both")
+            logging.info(f"Evaluating all trained model on training and testing dataset both")
 
 
             print('======== Model Trainer V3:Model List ======='*2)

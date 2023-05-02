@@ -262,8 +262,15 @@ class DataTransformation:
 
             #df_resample_random.to_csv(resample_data_file_path, index=False)
             
-            ##############################################################################################################
             ############################################################################################################
+            # 
+            #              ORIGINAL AND NON RESAMPLED DATA WILL BE EXPORTED TO TRANSFORMED DATA FOLDER
+            #               THIS IS BECAUSE ORIGINAL DATA IS PERFORMING WELL ON TEST SET
+            #               AND DUE TO LACK OF TIME AND AND TO PREVENT BREAKING OF CODE
+            #               I AM EXPORTING SAME ORIGINAL TRAIN AND TST FILES TO TRANSFORMED and 
+            #               RESAMPLED DATA FOLDER
+            #
+            #############################################################################################################
 
             logging.info("Exporting Resampled Train data.....")
 
@@ -275,10 +282,14 @@ class DataTransformation:
 
 
             os.makedirs(train_resample_dir, exist_ok=True)
-            train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
-            df_resample_random.to_csv(train_resample_file_path, index=False)
+            #train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
+
+
+            train_resample_file_path = os.path.join(train_resample_dir, "train_non_resample_major.csv")
+            #df_resample_random.to_csv(train_resample_file_path, index=False)
+            train.to_csv(train_resample_file_path, index=False)
             
-            logging.info(f"Resampled train file exportd: [ {train_file_path} ]")
+            logging.info(f"Non Resampled train file exportd: [ {train_file_path} ]")
 
 
             test_non_resampled = test
