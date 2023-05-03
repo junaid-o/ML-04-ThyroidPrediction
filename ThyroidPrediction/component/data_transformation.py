@@ -191,9 +191,9 @@ class DataTransformation:
             #################################################################
 
 
-            categorical_features = ['sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication','sick','pregnant',
+            categorical_features = ['sex','on_thyroxine','on_antithyroid_medication','sick','pregnant',
                                     'thyroid_surgery','I131_treatment','query_hypothyroid','query_hyperthyroid','lithium',
-                                    'goitre','tumor','hypopituitary','psych']
+                                    'goitre','tumor','hypopituitary','psych','referral_source_SVHC','referral_source_SVHD','referral_source_SVI','referral_source_other']
 
             continuous_features = train.drop(categorical_features, axis=1)
 
@@ -283,16 +283,18 @@ class DataTransformation:
 
             os.makedirs(train_resample_dir, exist_ok=True)
             #train_resample_file_path = os.path.join(train_resample_dir, "train_resample_major.csv")
-
-
             train_resample_file_path = os.path.join(train_resample_dir, "train_non_resample_major.csv")
+            
+            #df_resample_random =  df_resample_random.drop(['referral_source_SVHC','referral_source_SVHD', 'referral_source_SVI', 'referral_source_other'], axis=1)
             #df_resample_random.to_csv(train_resample_file_path, index=False)
+            
+            train = train.drop(['referral_source_SVHC','referral_source_SVHD', 'referral_source_SVI', 'referral_source_other'], axis=1)
             train.to_csv(train_resample_file_path, index=False)
             
             logging.info(f"Non Resampled train file exportd: [ {train_file_path} ]")
 
 
-            test_non_resampled = test
+            test_non_resampled = test.drop(['referral_source_SVHC', 'referral_source_SVHD', 'referral_source_SVI', 'referral_source_other'], axis=1)
             test_resample_dir = os.path.join(self.data_transformation_config.resampled_data_dir , "test")
             os.makedirs(test_resample_dir, exist_ok=True)
             

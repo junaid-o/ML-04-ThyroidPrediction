@@ -5,59 +5,19 @@
 
 Thyroid disease is a common cause of medical diagnosis and prediction, with an onset that is difficult to forecast in medical research. The thyroid gland is one of our body's most vital organs. Thyroid hormone releases are responsible for metabolic regulation. Hyperthyroidism and hypothyroidism are one of the two common diseases of the thyroid that releases thyroid hormones in regulating the rate of body's metabolism.
 
-### **Explanation of Thyroid Detection Terms**
-
-### Negative
-Indicates the absence of any thyroid disease.
-
-### Binding Protein Related
-- **Increased Binding Protein:** High levels of thyroid-binding globulin (TBG) in blood.
-- **Decreased Binding Protein:** Low levels of TBG in blood.
-
-### Hypothyroidism
-- **Compensated Hypothyroidism:** TSH levels are high but thyroid hormone levels are within normal range.
-- **Primary Hypothyroidism:** Caused by a dysfunction of the thyroid gland itself.
-- **Secondary Hypothyroidism:** Caused by a malfunction in the pituitary gland or hypothalamus.
-
-### Hyperthyroidism
-- **Hyperthyroidism:** Overactive thyroid gland.
-- **T Toxic:** Presence of antibodies that stimulate the thyroid gland to produce too much thyroid hormone.
-
-### Goitre
-Enlargement of the thyroid gland.
-
-### Replacement Therapy
-- **Replacement Therapy:** Refers to the treatment of hypothyroidism with thyroid hormone replacement drugs.
-- **Underreplacement:** Insufficient thyroid hormone replacement.
-- **Overreplacement:** Excessive thyroid hormone replacement.
-
-### Sick
-Thyroid function is affected by an underlying medical condition.
-
-### Discordant
-Results of thyroid tests are inconsistent or do not match clinical symptoms.
-
-
-
-| Grouped Category | Target Variables |
-| ---------------- | ---------------- |
-| Negative         | negative         |
-| Binding Protein  | increased binding protein<br>decreased binding protein |
-| Hypothyroidism   | compensated hypothyroid<br>primary hypothyroid<br>secondary hypothyroid |
-| Hyperthyroidism  | hyperthyroid<br>T toxic<br>secondary toxic |
-| Goitre           | goitre           |
-| Replacement      | replacement therapy<br>underreplacement<br>overreplacement |
-| Sick             | sick             |
-| Discordant       | discordant       |
-
-
 
 ## **Problem Statement**
 The main goal is to predict the estimated risk on a patient's chance of obtaining thyroid disease or not.
 
-
+## **Dataset:**
 <center>
 <a href="https://archive.ics.uci.edu/ml/datasets/thyroid+disease"><button data-md-button>Dataset</button></a>
+</center>
+
+
+## **Deployment**
+
+<center>
 <a href="/"><button data-md-button>Deployment</button></a> 
 </center>
 
@@ -66,22 +26,22 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 
 ## **Tools & Techniques**
 
-*   Data versioning using time stamp
-*   Code versioning using Git
-*   Modular coding with separate files for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration etc
-*   CI / CD using GitHub Actions
-*   S3 Bucket for storage of dataset.
-*   Docker
-*   Custome logger
-*   Custom Exception Handler
-*   Package building using setuptools
+*   `Data versioning` using time stamp
+*   `Code versioning` using Git
+*   `Modular coding` with separate files for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration etc
+*   `CI / CD` using GitHub Actions
+*   `S3 Bucket` for storage of dataset.
+*   `Docker` file created
+*   Custome `logger`
+*   Custom `Exception Handler`
+*   `Package building` using setuptools
 
 
 ## **Result**
 
 *   Model trained on original data performed better than model trained on resampled data.
 *   Best performer in both coditions is `RandomForestClassifier`
-    *   Scores Achieved are:
+    *   Scores Achieved:
         
 
         | Metric                | Train | Test  |
@@ -99,6 +59,8 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 *   Balanced Accuracy
 *   Log loss
 *   ConfusionMetrics
+*   Learning Curve
+*   Complexity and Scalability
 
 
 ## **Approach**
@@ -153,8 +115,8 @@ if f1_logic and roc_auc_logic and model_accuracy_logic and loss_logic:
 *   Render
 
 
-
 # **Installation**
+
 
 ## **Requirements**
 

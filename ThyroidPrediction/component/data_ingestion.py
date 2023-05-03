@@ -343,7 +343,7 @@ class DataIngestion:
 
             df_combined.drop_duplicates(inplace=True)
             df_combined["Class"].replace(to_replace= r"[.|0-9]",value="", regex=True, inplace=True)
-            df_combined = df_combined.drop(['TSH_measured','T3_measured','TT4_measured','T4U_measured','FTI_measured','TBG_measured'], axis=1)
+            df_combined = df_combined.drop(['TSH_measured','T3_measured','TT4_measured','T4U_measured','FTI_measured','TBG_measured','query_on_thyroxine'], axis=1)
 
 
 
@@ -960,7 +960,7 @@ class DataIngestion:
             try:
                 _, df_combined_plot = self.outliers_handling()
 
-                col1 = ['sex','on_thyroxine','query_on_thyroxine','on_antithyroid_medication','sick','pregnant','thyroid_surgery',
+                col1 = ['sex','on_thyroxine','on_antithyroid_medication','sick','pregnant','thyroid_surgery',
                         'I131_treatment','query_hypothyroid','query_hyperthyroid','lithium','goitre','tumor','hypopituitary','psych',
                         'referral_source', "Class"]
                 #col2 = [ 'I131_treatment','query_hypothyroid','query_hyperthyroid','lithium','goitre','tumor','hypopituitary','psych']
