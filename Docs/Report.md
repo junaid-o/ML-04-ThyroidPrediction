@@ -87,7 +87,23 @@ Multiclass Classification of Diseased state of thyroid.
 ![architechture.drawio.png](architechture.drawio.png)
 
 
-# **Data Ingestion**
+# **Coding Methodology**
+
+## **Tools & Techniques**
+
+*   `Data versioning` using time stamp
+*   `Code versioning` using Git
+*   `Modular coding` with separate files for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration, constants, secret keys, artifacts etc
+*   `CI / CD Pipeline` using GitHub Actions
+*   `S3 Bucket` for storage of dataset.
+*   `Docker` for creating container
+*   Custome `logger`
+*   Custom `Exception Handler`
+*   `Package building` using setuptools
+*   `Deplyment` on **Elastic Beanstalk**, **Auzre**, *Render**
+
+
+## **Data Ingestion**
 
 *   Implemented `S3 Bucket` for cloud storage of data
 *   Base data will be available locally
@@ -98,11 +114,11 @@ Multiclass Classification of Diseased state of thyroid.
             *   If available, then it will use latest version of data available in local s3 bucket folder.
             *   If not available, it will use base data which be available without any modification.
 
-#   **Data Validation**
+##   **Data Validation**
 *   Data will be validated for availability of independent and dependent features.
 
 
-#   **Data Processing and Transformation**
+##   **Data Processing and Transformation**
 
 *   Data type handling
 *   Missing value handdling with **SimpleImputer**
@@ -111,7 +127,7 @@ Multiclass Classification of Diseased state of thyroid.
 *   Grouping 15 class labels into 8 major class labels based on domain knowledge
 
 
-# **Model Training & Evaluation**
+## **Model Training & Evaluation**
 
 *   `RandomForestClassifier` is best performer. Apart from it `KNeighborClassifer`, `LightGBM`, `AdaBoost` has also been tested.
 *   Model will be trained based on the parameter grid defined in model.yaml file
@@ -133,15 +149,15 @@ Multiclass Classification of Diseased state of thyroid.
     *   **Log Loss train <= 1.013**
     *   **Log Loss train test diff <= 0.04**
 
-# **Model Pushing**
+## **Model Pushing**
 
 * The accepted model will be saved separately and will automatically integrated with **FlaskWeb App**
 
-# **Logger and Exception Handler**
+## **Logger and Exception Handler**
 
 Custom logger and exception handler have been implemented at required places
 
-# **Reports**
+## **Reports**
 
 All reports will be automatically generated during the proces
 
@@ -149,3 +165,19 @@ All reports will be automatically generated during the proces
 *   **PROFILING REPORT**
 *   **EDA REPORT**
 *   **MODEL PERFORMANCE REPORT**
+
+
+## **Result**
+
+*   Model trained on original data performed better than model trained on resampled data.
+*   Best performer in both coditions is `RandomForestClassifier`
+    *   Scores Achieved:
+        
+
+        | Metric                | Train | Test  |
+        |-----------------------|-------|-------|
+        | F1 weighted           | 0.732 | 0.732 |        
+        | ROC AUC OVR Weighted  | 0.732 | 0.732 |
+        | Balanced Accuracy     | 0.732 | 0.732 |
+        | Log loss              | 0.83  | 0.832 |
+        | Precission            | 0.83  | 0.832 |

@@ -28,13 +28,14 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 
 *   `Data versioning` using time stamp
 *   `Code versioning` using Git
-*   `Modular coding` with separate files for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration etc
-*   `CI / CD` using GitHub Actions
+*   `Modular coding` with separate files for data ingestion, transformation, validation, training, evaluation, performance monitoring, model pusher, model configuration, constants, secret keys, artifacts etc
+*   `CI / CD Pipeline` using GitHub Actions
 *   `S3 Bucket` for storage of dataset.
-*   `Docker` file created
+*   `Docker` for creating container
 *   Custome `logger`
 *   Custom `Exception Handler`
 *   `Package building` using setuptools
+*   `Deplyment` on **Elastic Beanstalk**, **Auzre**, *Render**
 
 
 ## **Result**
