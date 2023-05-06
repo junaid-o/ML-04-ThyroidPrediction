@@ -8,7 +8,7 @@ card.forEach((element, i) => {
   floatable(element);
 });
 
-function floatable (panel) {
+function floatable(panel) {
   let content = panel.querySelector(".content");
   panel.addEventListener('mouseout', e => {
     content.style.transform = `perspective(400px)

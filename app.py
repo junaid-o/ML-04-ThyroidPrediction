@@ -199,7 +199,7 @@ def predict():
         age = float(request.form['age'])
         sex = float(request.form['sex'])
         on_thyroxine = float(request.form['on_thyroxine'])
-        query_on_thyroxine = float(request.form['query_on_thyroxine'])
+        #query_on_thyroxine = float(request.form['query_on_thyroxine'])
         on_antithyroid_medication = float(request.form['on_antithyroid_medication'])
         sick = float(request.form['sick'])
         pregnant = float(request.form['pregnant'])
@@ -223,31 +223,31 @@ def predict():
         #referral_source_SVI = float(request.form["referral_source_SVI"])
         #referral_source_other = float(request.form["referral_source_other"])
 
-        referral_source = float(request.form["referral_source"])
+        #referral_source = float(request.form["referral_source"])
 
-        if referral_source==0:
-            referral_source_SVHC = 1
-            referral_source_SVHD = 0
-            referral_source_SVI = 0
-            referral_source_other = 0
+        #if referral_source==0:
+        #    referral_source_SVHC = 1
+        #    referral_source_SVHD = 0
+        #    referral_source_SVI = 0
+        #    referral_source_other = 0
 
-        elif referral_source==1:
-            referral_source_SVHC = 0
-            referral_source_SVHD = 1
-            referral_source_SVI = 0
-            referral_source_other = 0
+        #elif referral_source==1:
+        #    referral_source_SVHC = 0
+        #    referral_source_SVHD = 1
+        #    referral_source_SVI = 0
+        #    referral_source_other = 0
 
-        elif referral_source==2:
-            referral_source_SVHC = 0
-            referral_source_SVHD = 0
-            referral_source_SVI = 1
-            referral_source_other = 0
+        #elif referral_source==2:
+        #    referral_source_SVHC = 0
+        #    referral_source_SVHD = 0
+        #    referral_source_SVI = 1
+        #    referral_source_other = 0
 
-        elif referral_source==3:
-            referral_source_SVHC = 0
-            referral_source_SVHD = 0
-            referral_source_SVI = 0
-            referral_source_other = 1
+        #elif referral_source==3:
+        #    referral_source_SVHC = 0
+        #    referral_source_SVHD = 0
+        #    referral_source_SVI = 0
+        #    referral_source_other = 1
             
 
             
@@ -260,7 +260,7 @@ def predict():
                                    FTI=FTI,
                                    sex= sex,
                                    on_thyroxine= on_thyroxine,
-                                   query_on_thyroxine= query_on_thyroxine,
+                                   #query_on_thyroxine= query_on_thyroxine,
                                    on_antithyroid_medication= on_antithyroid_medication,
                                    sick= sick,
                                    pregnant= pregnant,
@@ -273,19 +273,20 @@ def predict():
                                    tumor=tumor,
                                    hypopituitary=hypopituitary,
                                    psych=psych,
-                                   referral_source_SVHC= referral_source_SVHC,
-                                   referral_source_SVHD=referral_source_SVHD,
-                                   referral_source_SVI=referral_source_SVI,
-                                   referral_source_other=referral_source_other
+                                   #referral_source_SVHC= referral_source_SVHC,
+                                   #referral_source_SVHD=referral_source_SVHD,
+                                   #referral_source_SVI=referral_source_SVI,
+                                   #referral_source_other=referral_source_other
 
                                    )
         
         thyroid_df = thyroid_data.get_thyroid_input_data_frame()
         thyroid_predictor = ThyroidPredictor(model_dir=MODEL_DIR)
         thyroid_prediction = thyroid_predictor.predict(X=thyroid_df)
+        
         context = {
             THYROID_DATA_KEY: thyroid_data.get_thyroid_data_as_dict(),
-            THYROID_PREDICTION_VALUE_KEY: thyroid_prediction,
+            THYROID_PREDICTION_VALUE_KEY: thyroid_prediction
         }
         
         return render_template('predict.html', context=context)

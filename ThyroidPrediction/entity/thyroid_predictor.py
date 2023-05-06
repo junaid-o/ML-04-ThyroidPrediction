@@ -9,11 +9,10 @@ import pandas as pd
 
 class ThyroidData:
 
-    def __init__(self, age: float, sex, on_thyroxine, query_on_thyroxine, on_antithyroid_medication, sick, pregnant,
+    def __init__(self, age: float, sex, on_thyroxine, on_antithyroid_medication, sick, pregnant,
                  thyroid_surgery, I131_treatment, query_hypothyroid, query_hyperthyroid, lithium, goitre,
                  tumor, hypopituitary, psych, TSH: float, T3: float, TT4: float, T4U: float, FTI: float,
-                 referral_source_SVHC, referral_source_SVHD, referral_source_SVI,
-                 referral_source_other):
+                 ):
 
         logging.info(f"{'>>' * 30} ThyroidData log started {'<<' * 30} ")
 
@@ -21,7 +20,7 @@ class ThyroidData:
             self.age = age
             self.sex = sex
             self.on_thyroxine = on_thyroxine
-            self.query_on_thyroxine = query_on_thyroxine
+            #self.query_on_thyroxine = query_on_thyroxine
             self.on_antithyroid_medication = on_antithyroid_medication
             self.sick = sick
             self.pregnant = pregnant
@@ -39,10 +38,10 @@ class ThyroidData:
             self.TT4 = TT4
             self.T4U = T4U
             self.FTI = FTI
-            self.referral_source_SVHC = referral_source_SVHC
-            self.referral_source_SVHD = referral_source_SVHD
-            self.referral_source_SVI = referral_source_SVI
-            self.referral_source_other = referral_source_other
+            #self.referral_source_SVHC = referral_source_SVHC
+            #self.referral_source_SVHD = referral_source_SVHD
+            #self.referral_source_SVI = referral_source_SVI
+            #self.referral_source_other = referral_source_other
 
         except Exception as e:
             raise ThyroidException(e, sys) from e
@@ -67,7 +66,7 @@ class ThyroidData:
             input_data = {"age": [self.age],
                           "sex":[self.sex],
                           "on_thyroxine":[self.on_thyroxine],
-                          "query_on_thyroxine":[self.query_on_thyroxine],
+                          #"query_on_thyroxine":[self.query_on_thyroxine],
                           "on_antithyroid_medication":[self.on_antithyroid_medication],
                           "sick":[self.sick],
                           "pregnant":[self.pregnant],
@@ -87,10 +86,10 @@ class ThyroidData:
                           "T4U": [self.T4U],
                           "FTI": [self.FTI],
 
-                          "referral_source_SVHC":[self.referral_source_SVHC],
-                          "referral_source_SVHD":[self.referral_source_SVHD],
-                          "referral_source_SVI":[self.referral_source_SVI],
-                          "referral_source_other":[self.referral_source_other],
+                          #"referral_source_SVHC":[self.referral_source_SVHC],
+                          #"referral_source_SVHD":[self.referral_source_SVHD],
+                          #"referral_source_SVI":[self.referral_source_SVI],
+                          #"referral_source_other":[self.referral_source_other],
                           }
            
             return input_data
