@@ -47,11 +47,11 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 
         | Metric                | Train | Test  |
         |-----------------------|-------|-------|
-        | F1 weighted           | 0.732 | 0.732 |        
-        | ROC AUC OVR Weighted  | 0.732 | 0.732 |
-        | Balanced Accuracy     | 0.732 | 0.732 |
-        | Log loss              | 0.83  | 0.832 |
-        | Precission            | 0.83  | 0.832 |
+        | F1 weighted           | 0.744 | 0.732 |        
+        | ROC AUC OVR Weighted  | 0.891 | 0.87 |
+        | Balanced Accuracy     | 0.872 | 0.822 |
+        | Log loss              | 0.0.99| 1.027 |
+        
 
 
 ## **Evaluation Metrices**

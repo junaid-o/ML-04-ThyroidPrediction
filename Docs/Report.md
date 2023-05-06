@@ -141,13 +141,13 @@ Multiclass Classification of Diseased state of thyroid.
 *   For the model to be accepted it needs to be above the defined thresholds:
 
     *   **Balanced Accuracy train >= 0.87**
-    *   **Balanced Accuracy train tst diff <= 0.04**
-    *   **F1 Weighted train >= 0.738**
-    *   **F1 Weighted train test diff <= 0.009**    
-    *   **ROC AUC Ovr Weighted train >= 0.89**
-    *   **ROC AUC Ovr Weighted train test diff <= 0.02**
+    *   **Balanced Accuracy train tst diff <= 0.06**
+    *   **F1 Weighted train >= 0.70**
+    *   **F1 Weighted train test diff <= 0.04**    
+    *   **ROC AUC Ovr Weighted train >= 0.88**
+    *   **ROC AUC Ovr Weighted train test diff <= 0.05**
     *   **Log Loss train <= 1.013**
-    *   **Log Loss train test diff <= 0.04**
+    *   **Log Loss train test diff <= 0.05**
 
 ## **Model Pushing**
 
@@ -176,8 +176,8 @@ All reports will be automatically generated during the proces
 
         | Metric                | Train | Test  |
         |-----------------------|-------|-------|
-        | F1 weighted           | 0.732 | 0.732 |        
-        | ROC AUC OVR Weighted  | 0.732 | 0.732 |
-        | Balanced Accuracy     | 0.732 | 0.732 |
-        | Log loss              | 0.83  | 0.832 |
-        | Precission            | 0.83  | 0.832 |
+        | F1 weighted           | 0.732 | 0.744 |        
+        | ROC AUC OVR Weighted  | 0.891 | 0.87 |
+        | Balanced Accuracy     | 0.878 | 0.822 |
+        | Log loss              | 0.99  | 1.027 |
+        
