@@ -111,7 +111,6 @@ if f1_logic and roc_auc_logic and model_accuracy_logic and loss_logic:
 
 ## **Deployments**
 
-*   AWS Beanstalk
 *   Azure
 *   Render
 

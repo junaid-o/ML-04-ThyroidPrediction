@@ -100,7 +100,7 @@ Multiclass Classification of Diseased state of thyroid.
 *   Custome `logger`
 *   Custom `Exception Handler`
 *   `Package building` using setuptools
-*   `Deplyment` on **Elastic Beanstalk**, **Auzre**, *Render**
+*   `Deplyment` on **Auzre**, **Render**
 
 
 ## **Data Ingestion**
@@ -181,3 +181,11 @@ All reports will be automatically generated during the proces
         | Balanced Accuracy     | 0.878 | 0.822 |
         | Log loss              | 0.99  | 1.027 |
         
+
+## Deployment
+-   Deployment tested on Azure and Elastic Beanstalk
+-   For Deployment on aws, two extra folder are added:
+    -   .nbxtentions
+    -   .elastickbeanstalk
+
+-   For CI/C main.yaml file will be added to .github/workflows/main.yaml
