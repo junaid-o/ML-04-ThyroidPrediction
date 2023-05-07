@@ -130,10 +130,14 @@ class DataIngestion:
                 if not os.path.isdir(path):
                     return False
                 
+                if len(os.listdir(path)) != 0:
+                        return False
+                
                 for dirpath, dirnames, filenames in os.walk(path):
                     if dirnames or filenames:
-                        return False
+                        return False                                
                 return True
+                
 
             print(f"=========== s3 bucket is empty: {is_dir_empty(s3_bucket_download_dir)}")
             print("====================================================================")
@@ -153,6 +157,12 @@ class DataIngestion:
                     
                     logging.info("=============== DATA FETCHING FROM S3 BUCKET ==================")
                     print("=============== DATA FETCHING FROM S3 BUCKET ==================")
+                else:
+                    logging.info("=============== DATA FETCHING FROM LOCAL_DATASET_BASE ==================")
+                    print("=============== DATA FETCHING FROM LOCAL_DATASET_BASE  ==================")
+                    dataset_base = self.base_dataset_path
+                    raw_data_dir = self.base_data_ingestion_config.raw_data_dir
+                    raw_data_dir_path = os.path.join(dataset_base, raw_data_dir)                    
             except:
                 logging.info("=============== DATA FETCHING FROM LOCAL_DATASET_BASE ==================")
                 print("=============== DATA FETCHING FROM LOCAL_DATASET_BASE  ==================")
