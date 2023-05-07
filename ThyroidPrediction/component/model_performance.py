@@ -12,7 +12,7 @@ import numpy as np
 import os
 import sys
 from ThyroidPrediction.util.util import write_yaml_file, read_yaml_file, load_object,load_data
-from ThyroidPrediction.entity.model_factory import evaluate_classification_model #, evaluate_regression_model
+from ThyroidPrediction.entity.model_factory import evaluate_classification_model
 import matplotlib.pyplot as plt
 
 

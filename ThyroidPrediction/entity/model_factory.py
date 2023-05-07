@@ -9,7 +9,7 @@ import yaml
 from pyexpat import model
 from cmath import log
 from typing import List
-from sklearn.metrics import balanced_accuracy_score, f1_score, r2_score,mean_squared_error, roc_auc_score, log_loss
+from sklearn.metrics import balanced_accuracy_score, f1_score, roc_auc_score, log_loss
 
 from collections import namedtuple
 from ThyroidPrediction.logger import logging
