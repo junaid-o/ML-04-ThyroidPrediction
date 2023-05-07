@@ -21,6 +21,9 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 <a href="/"><button data-md-button>Deployment</button></a> 
 </center>
 
+## **Demo**
+
+![Demo Video](https://www.youtube.com/watch?v=VFK3RyNAre8)
 
 
 
@@ -215,31 +218,14 @@ ML-04-ThyroidPrediction
 |
 ├─ Dockerfile
 ├─ Docs
-│  ├─ DeveloperNotes.md
-│  └─ Thyroid Disease Detection.pdf
 ├─ LICENSE
 ├─ logs
 ├─ Notebook
 ├─ README.md
 ├─ requirements.txt
 ├─ saved_models
-│  ├─ 20230501225927
-│  │  ├─ model.pkl
-│  │  └─ score
-│  │     ├─ model_score.csv
-│  │     └─ model_score.html
-│  ├─ 20230502024020
-│    ├─ model.pkl
-│    └─ score
-│       ├─ model_score.csv
-│       └─ model_score.html
-│  
 ├─ setup.py
 ├─ static
-│  ├─ css
-│  │  └─ style.css
-│  └─ js
-│     └─ script.js
 ├─ templates
 │  ├─ bulk_prediction.html
 │  ├─ drift_report.html
@@ -257,85 +243,22 @@ ML-04-ThyroidPrediction
 │  ├─ saved_models_files.html
 │  ├─ train.html
 │  └─ update_model.html
+|
 └─ ThyroidPrediction
    ├─ artifact
    │  ├─ base_data_ingestion
-   │  │  ├─ 2023-05-01-17-08-31
-   │  │  │  └─ cleaned_data
-   │  │  │     ├─ processed_data
-   │  │  │     │  ├─ Cleaned_transformed
-   │  │  │     │  │  └─ df_transformed_major_class.csv
-   │  │  │     │  └─ split_data
-   │  │  │     │     ├─ test_set
-   │  │  │     │     │  └─ test.csv
-   │  │  │     │     └─ train_set
-   │  │  │     │        └─ train.csv
-   │  │  │     └─ raw_data_merged
-   │  │  │        └─ df_combined.csv
-   │  │  ├─ 2023-05-01-22-06-15
-   │  │    └─ cleaned_data
-   │  │       ├─ processed_data
-   │  │       │  ├─ Cleaned_transformed
-   │  │       │  │  └─ df_transformed_major_class.csv
-   │  │       │  └─ split_data
-   │  │       │     ├─ test_set
-   │  │       │     │  └─ test.csv
-   │  │       │     └─ train_set
-   │  │       │        └─ train.csv
-   │  │       └─ raw_data_merged
-   │  │          └─ df_combined.csv
    │  │  
    │  ├─ data_validation
-   │  │  ├─ 2023-05-01-17-08-31
-   │  │  │  ├─ drift_report.html
-   │  │  │  └─ drift_report.json
-   │  │  ├─ 2023-05-01-22-06-15
-   │  │      ├─ drift_report.html
-   │  │      └─ drift_report.json
    |  |
    │  ├─ experiment
    │  │  └─ experiment.csv
    │  ├─ model_evaluation
    │  │  └─ model_evaluation.yaml
    │  ├─ model_trainer
-   │  │  ├─ 2023-05-01-17-08-31
-   │  │  │  ├─ score
-   │  │  │  │  ├─ model_score.csv
-   │  │  │  │  └─ model_score.html
-   │  │  │  └─ trained_model
-   │  │  │     └─ model.pkl
-   │  │  ├─ 2023-05-01-22-40-48
-   │  │     ├─ performance
-   │  │     │  └─ PerformanceReport.html
-   │  │     ├─ score
-   │  │     │  ├─ model_score.csv
-   │  │     │  └─ model_score.html
-   │  │     └─ trained_model
-   │  │        └─ model.pkl
    |  |
    │  ├─ Profiling
-   │  │  ├─ 2023-05-01-22-03-28
-   │  │  │  ├─ Part_1
-   │  │  │  └─ Part_2
-   │  │  ├─ 2023-05-01-22-06-15
-   │  │     ├─ Part_1
-   │  │     │  └─ ProfileReport_1.html
-   │  │     └─ Part_2
-   │  │        └─ ProfileReport_2.html
    |  |
    │  └─ transformed_data_dir
-   │     ├─ 2023-05-01-17-08-31
-   │     │  └─ resampled_data
-   │     │     ├─ test
-   │     │     │  └─ test_non_resample_major.csv
-   │     │     └─ train
-   │     │        └─ train_non_resample_major.csv
-   │     ├─ 2023-05-01-22-06-15
-   │       └─ resampled_data
-   │          ├─ test
-   │          │  └─ test_non_resample_major.csv
-   │          └─ train
-   │             └─ train_non_resample_major.csv
    | 
    ├─ component
    │  ├─ data_ingestion.py
@@ -352,47 +275,6 @@ ML-04-ThyroidPrediction
    ├─ constant
    │  └─ __init__.py
    ├─ dataset_base
-   │  ├─ Processed_Dataset
-   │  │  ├─ Cleaned_Data
-   │  │  │  └─ df_combined_cleaned.csv
-   │  │  ├─ Resampled_Dataset
-   │  │  │  ├─ ResampleData_major.csv
-   │  │  │  ├─ test_resampled
-   │  │  │  │  └─ test_non_resample_major.csv
-   │  │  │  └─ train_resampled
-   │  │  │     └─ train_resample_major.csv
-   │  │  └─ Transformed_Data
-   │  │     └─ df_transformed_major_class.csv
-   │  ├─ raw_data
-   │  │  ├─ allbp
-   │  │  │  ├─ allbp.data
-   │  │  │  ├─ allbp.names
-   │  │  │  └─ allbp.test
-   │  │  ├─ allhyper
-   │  │  │  ├─ allhyper.data
-   │  │  │  ├─ allhyper.names
-   │  │  │  └─ allhyper.test
-   │  │  ├─ allhypo
-   │  │  │  ├─ allhypo.data
-   │  │  │  ├─ allhypo.names
-   │  │  │  └─ allhypo.test
-   │  │  ├─ allrep
-   │  │  │  ├─ allrep.data
-   │  │  │  ├─ allrep.names
-   │  │  │  └─ allrep.test
-   │  │  ├─ dis
-   │  │  │  ├─ dis.data
-   │  │  │  ├─ dis.names
-   │  │  │  └─ dis.test
-   │  │  └─ sick
-   │  │     ├─ sick.data
-   │  │     └─ sick.test
-   │  ├─ ResampledData_major_class.csv
-   │  ├─ test_set
-   │  │  ├─ test_set
-   │  │  └─ test_set.csv
-   │  └─ train_set
-   │     └─ train_set.csv
    ├─ entity
    │  ├─ artifact_entity.py
    │  ├─ config_entity.py
@@ -415,3 +297,4 @@ ML-04-ThyroidPrediction
    └─ __init__.py
 
 ```
+
