@@ -1,5 +1,5 @@
 FROM python:3.10.10
-COPY . /app
+COPY . /application
 WORKDIR /app
 RUN pip install -r requirements.txt
 EXPOSE $PORT
