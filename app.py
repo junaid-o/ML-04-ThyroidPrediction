@@ -1,5 +1,6 @@
 from ast import mod
 from email import message
+from email.mime import application
 from ipaddress import collapse_addresses
 from re import S
 from numpy import dtype
@@ -39,8 +40,8 @@ THYROID_DATA_KEY = "thyroid_data"
 THYROID_PREDICTION_VALUE_KEY = "thyroid_prediction_value"
 
 
-app = Flask(__name__)
-
+application = Flask(__name__)
+app = application
 
 
 @app.route('/artifact', defaults={'req_path': 'ThyroidPrediction'})
