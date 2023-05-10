@@ -40,8 +40,8 @@ THYROID_DATA_KEY = "thyroid_data"
 THYROID_PREDICTION_VALUE_KEY = "thyroid_prediction_value"
 
 
-application = Flask(__name__)
-app = application
+app = Flask(__name__)
+
 
 
 @app.route('/artifact', defaults={'req_path': 'ThyroidPrediction'})
