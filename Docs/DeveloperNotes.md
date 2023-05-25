@@ -169,3 +169,8 @@ ML-04-ThyroidPrediction
    └─ __init__.py
 
 ```
+
+
+# Deployment: Elastic Beanstalk
+-   .ebextension/python.config folder and file should be there
+-   github/workflows/amin.yaml should not b there
