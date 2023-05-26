@@ -22,7 +22,15 @@ sudo usermod -aG docker ubuntu
 
 newgrp docker
 
-
+** Make sure to keep connct with cloud terminal which will be displayed upon hitting connect
+** if you hav already setup everything then just hit command
+```
+cd action-runner
+```
+then
+```
+./run.sh
+```
 ## Configure EC2 as self-hosted runner:
 
 ## Setup github secrets:
