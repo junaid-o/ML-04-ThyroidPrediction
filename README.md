@@ -37,7 +37,7 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 *   Custome `logger`
 *   Custom `Exception Handler`
 *   `Package building` using setuptools
-*   `Deplyment` on **Elastic Beanstalk**, **Auzre**, *Render**
+*   `Deplyment` tested on **Elastic Beanstalk**, **Auzre**, and on **AWS EC2 instance CI/CD** using Github Action Runner
 
 
 ## **Result**
