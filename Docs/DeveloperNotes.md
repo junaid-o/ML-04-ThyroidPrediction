@@ -174,3 +174,7 @@ ML-04-ThyroidPrediction
 # Deployment: Elastic Beanstalk
 -   .ebextension/python.config folder and file should be there
 -   github/workflows/amin.yaml should not b there
+
+# For Azure Deployment 
+-    Remov github/workflows folder
+
