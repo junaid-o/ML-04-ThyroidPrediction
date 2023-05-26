@@ -22,6 +22,7 @@ sudo usermod -aG docker ubuntu
 
 newgrp docker
 
+
 ## Configure EC2 as self-hosted runner:
 
 ## Setup github secrets:
