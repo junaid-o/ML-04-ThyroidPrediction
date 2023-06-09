@@ -22,8 +22,10 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 </center>
 
 ## **Demo**
+[DEMO](https://youtu.be/VFK3RyNAre8)
 
-[![Video Thumbnail](Docs\app_ui.png)](https://youtu.be/VFK3RyNAre8)
+
+[![Video Thumbnail](Docs/app_ui.png)](https://youtu.be/VFK3RyNAre8)
 
 
 ## **Tools & Techniques**
