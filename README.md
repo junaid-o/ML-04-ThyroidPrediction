@@ -1,4 +1,4 @@
-# <p align="center"><font color="red"><strong>Multiclass Classification of Diseased State of Thyroid</strong></font></p>
+# <font color="red"><strong>Multiclass Classification of Diseased State of Thyroid</strong></font>
 
 
 ## **Background:**
