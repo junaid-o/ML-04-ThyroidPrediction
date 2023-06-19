@@ -183,9 +183,9 @@ All reports will be automatically generated during the proces
         
 
 ## Deployment
--   Deployment tested on Azure and Elastic Beanstalk
--   For Deployment on aws, two extra folder are added:
+-   Deployment tested on Azure, EC2 Instance and Elastic Beanstalk
+-   For Deployment on aws elastic beanstalk, two extra folders are added:
     -   .nbxtentions
     -   .elastickbeanstalk
 
--   For CI/C main.yaml file will be added to .github/workflows/main.yaml
+-   For EC2 Instance CI/CD main.yaml file will be added to .github/workflows/main.yaml
