@@ -211,6 +211,8 @@ newgrp docker
 
 ## Configure EC2 as self-hosted runner:
 
+Go GithubRepo Settings > Actions > Runner > Create > Execute each statements one by one > Set self-hosted name for runner > everything else hit enter
+
 ## Setup github secrets:
 
 AWS_ACCESS_KEY_ID=
