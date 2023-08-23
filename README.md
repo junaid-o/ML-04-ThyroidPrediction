@@ -31,11 +31,11 @@ The main goal is to predict the estimated risk on a patient's chance of obtainin
 
 ##  **Documentations**
 
-- [**REPORT**](Docs\Report.md)
-- [**HLD**](Docs\HLD_1.0v.docx)
-- [**LLD**](Docs\LLD_UGV.docx)
-- [**WIREFRAME**](Docs\Wireframe.docx)
-- [**DevelopersNotes**](Docs\DeveloperNotes.md)
+- [**REPORT**](Docs/Report.md)
+- [**HLD**](Docs/HLD_1.0v.docx)
+- [**LLD**](Docs/LLD_UGV.docx)
+- [**WIREFRAME**](Docs/Wireframe.docx)
+- [**DevelopersNotes**](Docs/DeveloperNotes.md)
 
 
 ## **Tools & Techniques**
