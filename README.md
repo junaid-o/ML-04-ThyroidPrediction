@@ -1,5 +1,10 @@
 # <font color="red"><strong>Thyroid Disease Classification: A Multiclass Classification Approach</strong></font>
 
+![Python 3.10.12](https://img.shields.io/badge/python-3.10.12-blue.svg)
+![Static Badge](https://img.shields.io/badge/Scikit_learn-orange.svg)
+![Static Badge](https://img.shields.io/badge/yData_Profiling-purple.svg)
+![Static Badge](https://img.shields.io/badge/Evidently-maroon.svg)
+
 
 ## **Background:**
 
